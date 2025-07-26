@@ -8,6 +8,7 @@ import (
     "net/http"
     "strings"
     "time"
+    "yordamchi-dev-bot/database"
     "yordamchi-dev-bot/handlers"
 )
 
@@ -16,6 +17,7 @@ type Bot struct {
     URL     string
     Config  *handlers.Config
     Handler *handlers.CommandHandler
+    DB      *database.DB
 }
 
 type Update struct {
@@ -43,11 +45,17 @@ type Chat struct {
 }
 
 func NewBot(token string, config *handlers.Config) *Bot {
+    db, err := database.NewDB()
+    if err != nil {
+        log.Fatal("Ma'lumotlar bazasi xatoligi:", err)
+    }
+
     return &Bot{
         Token:   token,
         URL:     fmt.Sprintf("https://api.telegram.org/bot%s", token),
         Config:  config,
         Handler: handlers.NewCommandHandler(config),
+        DB:      db,
     }
 }
 
@@ -79,6 +87,25 @@ func (b *Bot) processMessage(msg Message) {
         return
     }
 
+     // Foydalanuvchini ma'lumotlar bazasida saqlash
+    err := b.DB.CreateOrUpdateUser(
+        int64(msg.From.ID),
+        msg.From.Username,
+        msg.From.FirstName,
+        msg.From.LastName,
+    )
+    if err != nil {
+        log.Printf("Foydalanuvchini saqlashda xatolik: %v", err)
+    }
+
+    // Faollikni yozish
+    if strings.HasPrefix(msg.Text, "/") {
+        err = b.DB.LogUserActivity(int64(msg.From.ID), msg.Text)
+        if err != nil {
+            log.Printf("Faollik yozishda xatolik: %v", err)
+        }
+    }
+
     // Foydalanuvchi faolligini logging qilish
     log.Printf("👤 %s (@%s): %s", msg.From.FirstName, msg.From.Username, msg.Text)
 
@@ -86,43 +113,51 @@ func (b *Bot) processMessage(msg Message) {
     text := strings.ToLower(msg.Text)
 
     switch {
-    case text == "/start":
-        welcomeMsg := b.Config.Messages.Welcome + "\n\n/help - barcha buyruqlar ro'yxati"
-        b.sendMessage(chatID, welcomeMsg)
-    case text == "/help":
-        b.sendMessage(chatID, b.Config.Messages.Help)
-    case text == "/ping":
-        b.sendMessage(chatID, "🏓 Pong! Bot ishlayapti ✅")
-    case text == "/hazil":
-        joke := handlers.GetRandomJoke(b.Config)
-        b.sendMessage(chatID, joke)
-    case text == "/iqtibos":
-        quote := handlers.GetRandomQuote(b.Config)
-        b.sendMessage(chatID, quote)
-    case text == "/haqida":
-        aboutText := fmt.Sprintf(`ℹ️ %s
+        case text == "/start":
+            welcomeMsg := b.Config.Messages.Welcome + "\n\n/help - barcha buyruqlar ro'yxati"
+            b.sendMessage(chatID, welcomeMsg)
+        case text == "/help":
+            b.sendMessage(chatID, b.Config.Messages.Help)
+        case text == "/ping":
+            b.sendMessage(chatID, "🏓 Pong! Bot ishlayapti ✅")
+        case text == "/hazil":
+            joke := handlers.GetRandomJoke(b.Config)
+            b.sendMessage(chatID, joke)
+        case text == "/iqtibos":
+            quote := handlers.GetRandomQuote(b.Config)
+            b.sendMessage(chatID, quote)
+        case text == "/haqida":
+            aboutText := fmt.Sprintf(`ℹ️ %s
 
-🔸 Versiya: %s
-🔸 Tavsif: %s
-🔸 Yaratuvchi: %s
-🔸 Til: Go (Golang)
+                                🔸 Versiya: %s
+                                🔸 Tavsif: %s
+                                🔸 Yaratuvchi: %s
+                                🔸 Til: Go (Golang)
 
-Bu bot Go tilini o'rganish jarayonida yaratilmoqda! 🎯`,
-            b.Config.Bot.Name,
-            b.Config.Bot.Version,
-            b.Config.Bot.Description,
-            b.Config.Bot.Author)
-        b.sendMessage(chatID, aboutText)
-    case text == "/vaqt":
-        currentTime := time.Now().Format("2006-01-02 15:04:05")
-        b.sendMessage(chatID, fmt.Sprintf("🕐 Hozirgi vaqt: %s", currentTime))
-    case text == "/salom":
-        greeting := fmt.Sprintf("👋 Salom, %s! Go dasturlashni o'rganishga tayyormisiz? 🚀", msg.From.FirstName)
-        b.sendMessage(chatID, greeting)
-    default:
-        if strings.HasPrefix(text, "/") {
-            b.sendMessage(chatID, b.Config.Messages.UnknownCommand)
-        }
+                                Bu bot Go tilini o'rganish jarayonida yaratilmoqda! 🎯`,
+                b.Config.Bot.Name,
+                b.Config.Bot.Version,
+                b.Config.Bot.Description,
+                b.Config.Bot.Author)
+            b.sendMessage(chatID, aboutText)
+        case text == "/vaqt":
+            currentTime := time.Now().Format("2006-01-02 15:04:05")
+            b.sendMessage(chatID, fmt.Sprintf("🕐 Hozirgi vaqt: %s", currentTime))
+        case text == "/salom":
+            greeting := fmt.Sprintf("👋 Salom, %s! Go dasturlashni o'rganishga tayyormisiz? 🚀", msg.From.FirstName)
+            b.sendMessage(chatID, greeting)
+        case text == "/stats":
+            count, err := b.DB.GetUserStats()
+            if err != nil {
+                b.sendMessage(chatID, "❌ Statistika olishda xatolik")
+            } else {
+                b.sendMessage(chatID, fmt.Sprintf("📊 Jami foydalanuvchilar: %d", count))
+            }
+
+        default:
+            if strings.HasPrefix(text, "/") {
+                b.sendMessage(chatID, b.Config.Messages.UnknownCommand)
+            }
     }
 }
 
