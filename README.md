@@ -77,7 +77,7 @@ cp .env.example .env
 # .env
 BOT_TOKEN=your_bot_token_from_botfather
 BOT_MODE=polling
-PORT=8080
+PORT=8090
 DB_TYPE=sqlite
 DEBUG=true
 ```
@@ -124,14 +124,14 @@ export BOT_TOKEN="your_actual_bot_token"
 export BOT_MODE="webhook"
 go run .
 
-# Terminal 2: Expose port 8080
-ngrok http 8080
+# Terminal 2: Expose port 8090
+ngrok http 8090
 ```
 
 **ngrok output example:**
 
 ```
-Forwarding    https://abc123.ngrok.io -> http://localhost:8080
+Forwarding    https://abc123.ngrok.io -> http://localhost:8090
 ```
 
 #### Step 3: Set Webhook via Postman
@@ -323,7 +323,7 @@ pkill -f "go run"
 ps aux | grep ngrok
 
 # Restart ngrok
-ngrok http 8080
+ngrok http 8090
 
 # Verify webhook URL matches ngrok URL
 curl "https://api.telegram.org/bot<YOUR_TOKEN>/getWebhookInfo"

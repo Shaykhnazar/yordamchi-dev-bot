@@ -5,6 +5,7 @@ import (
     "os"
     "yordamchi-dev-bot/handlers"
     "github.com/joho/godotenv"
+    "yordamchi-dev-bot/database"
 )
 
 func main() {
@@ -28,9 +29,25 @@ func main() {
         log.Fatal("BOT_TOKEN environment variable topilmadi. .env faylini tekshiring!")
     }
 
-    // Bot'ni yaratish va konfiguratsiyani uzatish
-    bot := NewBot(token, config)
-    log.Printf("🤖 %s (v%s) ishga tushdi!", config.Bot.Name, config.Bot.Version)
+     // Ma'lumotlar bazasi turini aniqlash
+    var db *database.DB
+    dbType := os.Getenv("DB_TYPE")
+    
+    switch dbType {
+    case "postgres":
+        db, err = database.NewPostgresDB()
+    default:
+        db, err = database.NewDB() // SQLite
+    }
+    
+    if err != nil {
+        log.Fatal("Ma'lumotlar bazasi xatoligi:", err)
+    }
+    defer db.Close()
+
+    bot := NewBotWithDB(token, config, db)
+    log.Printf("🤖 %s (v%s) %s bilan ishga tushdi!", 
+        config.Bot.Name, config.Bot.Version, dbType)
     
     if err := bot.Start(); err != nil {
         log.Fatal("Bot'ni ishga tushirishda xatolik:", err)
