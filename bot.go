@@ -7,11 +7,15 @@ import (
     "log"
     "net/http"
     "strings"
+    "time"
+    "yordamchi-dev-bot/handlers"
 )
 
 type Bot struct {
-    Token string
-    URL   string
+    Token   string
+    URL     string
+    Config  *handlers.Config
+    Handler *handlers.CommandHandler
 }
 
 type Update struct {
@@ -38,10 +42,12 @@ type Chat struct {
     Type string `json:"type"`
 }
 
-func NewBot(token string) *Bot {
+func NewBot(token string, config *handlers.Config) *Bot {
     return &Bot{
-        Token: token,
-        URL:   fmt.Sprintf("https://api.telegram.org/bot%s", token),
+        Token:   token,
+        URL:     fmt.Sprintf("https://api.telegram.org/bot%s", token),
+        Config:  config,
+        Handler: handlers.NewCommandHandler(config),
     }
 }
 
@@ -73,53 +79,77 @@ func (b *Bot) processMessage(msg Message) {
         return
     }
 
+    // Foydalanuvchi faolligini logging qilish
+    log.Printf("👤 %s (@%s): %s", msg.From.FirstName, msg.From.Username, msg.Text)
+
     chatID := msg.Chat.ID
     text := strings.ToLower(msg.Text)
 
     switch {
     case text == "/start":
-        b.sendMessage(chatID, "🎉 Assalomu alaykum! Men Yordamchi Dev Bot. Go dasturlash tilini o'rganishingizda yordam beraman!\n\n/help - barcha buyruqlar ro'yxati")
+        welcomeMsg := b.Config.Messages.Welcome + "\n\n/help - barcha buyruqlar ro'yxati"
+        b.sendMessage(chatID, welcomeMsg)
     case text == "/help":
-        helpText := `🤖 Yordamchi Dev Bot Buyruqlari:
-
-/start - Botni ishga tushirish
-/help - Bu yordam xabari
-/ping - Bot ishlaganligini tekshirish
-/hazil - Tasodifiy hazil
-/iqtibos - Motivatsion iqtibos
-
-Keyingi haftalarda ko'proq funksiyalar qo'shiladi! 🚀`
-        b.sendMessage(chatID, helpText)
+        b.sendMessage(chatID, b.Config.Messages.Help)
     case text == "/ping":
         b.sendMessage(chatID, "🏓 Pong! Bot ishlayapti ✅")
     case text == "/hazil":
-        b.sendMessage(chatID, "😄 Dasturchi nima uchun ko'zoynak kiyadi? Chunki Java ko'ra olmaydi! ☕")
+        joke := handlers.GetRandomJoke(b.Config)
+        b.sendMessage(chatID, joke)
     case text == "/iqtibos":
-        b.sendMessage(chatID, "💭 \"Birinchi kod ishlamasa, console.log qo'sh\" - Har bir dasturchi")
+        quote := handlers.GetRandomQuote(b.Config)
+        b.sendMessage(chatID, quote)
+    case text == "/haqida":
+        aboutText := fmt.Sprintf(`ℹ️ %s
+
+🔸 Versiya: %s
+🔸 Tavsif: %s
+🔸 Yaratuvchi: %s
+🔸 Til: Go (Golang)
+
+Bu bot Go tilini o'rganish jarayonida yaratilmoqda! 🎯`,
+            b.Config.Bot.Name,
+            b.Config.Bot.Version,
+            b.Config.Bot.Description,
+            b.Config.Bot.Author)
+        b.sendMessage(chatID, aboutText)
+    case text == "/vaqt":
+        currentTime := time.Now().Format("2006-01-02 15:04:05")
+        b.sendMessage(chatID, fmt.Sprintf("🕐 Hozirgi vaqt: %s", currentTime))
+    case text == "/salom":
+        greeting := fmt.Sprintf("👋 Salom, %s! Go dasturlashni o'rganishga tayyormisiz? 🚀", msg.From.FirstName)
+        b.sendMessage(chatID, greeting)
     default:
         if strings.HasPrefix(text, "/") {
-            b.sendMessage(chatID, "❓ Noma'lum buyruq. /help yozing")
+            b.sendMessage(chatID, b.Config.Messages.UnknownCommand)
         }
     }
 }
 
-func (b *Bot) sendMessage(chatID int, text string) {
+func (b *Bot) sendMessage(chatID int, text string) error {
     url := fmt.Sprintf("%s/sendMessage", b.URL)
     
-    payload := fmt.Sprintf(`{
-        "chat_id": %d,
-        "text": "%s",
-        "parse_mode": "HTML"
-    }`, chatID, text)
-
-    resp, err := http.Post(url, "application/json", strings.NewReader(payload))
+    payload := map[string]interface{}{
+        "chat_id":    chatID,
+        "text":       text,
+        "parse_mode": "HTML",
+    }
+    
+    jsonPayload, err := json.Marshal(payload)
     if err != nil {
-        log.Println("Xabar yuborishda xatolik:", err)
-        return
+        return fmt.Errorf("JSON yaratishda xatolik: %w", err)
+    }
+
+    resp, err := http.Post(url, "application/json", strings.NewReader(string(jsonPayload)))
+    if err != nil {
+        return fmt.Errorf("HTTP so'rov yuborishda xatolik: %w", err)
     }
     defer resp.Body.Close()
 
     if resp.StatusCode != 200 {
-        log.Printf("Telegram API xatolik: %d", resp.StatusCode)
+        body, _ := io.ReadAll(resp.Body)
+        return fmt.Errorf("Telegram API xatolik: %d, javob: %s", resp.StatusCode, string(body))
     }
+
+    return nil
 }
