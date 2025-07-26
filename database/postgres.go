@@ -59,3 +59,4 @@ func (db *DB) createPostgresTables() error {
     _, err := db.conn.Exec(query)
     return err
 }
+

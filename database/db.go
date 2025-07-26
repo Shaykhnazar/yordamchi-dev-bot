@@ -66,11 +66,11 @@ func (db *DB) createTables() error {
 func (db *DB) CreateOrUpdateUser(telegramID int64, username, firstName, lastName string) error {
     query := `
     INSERT INTO users (telegram_id, username, first_name, last_name)
-    VALUES (?, ?, ?, ?)
+    VALUES ($1, $2, $3, $4)
     ON CONFLICT(telegram_id) DO UPDATE SET
-        username = excluded.username,
-        first_name = excluded.first_name,
-        last_name = excluded.last_name,
+        username = EXCLUDED.username,
+        first_name = EXCLUDED.first_name,
+        last_name = EXCLUDED.last_name,
         updated_at = CURRENT_TIMESTAMP
     `
 
@@ -84,14 +84,14 @@ func (db *DB) CreateOrUpdateUser(telegramID int64, username, firstName, lastName
 }
 
 func (db *DB) LogUserActivity(telegramID int64, command string) error {
-    userIDQuery := "SELECT id FROM users WHERE telegram_id = ?"
+    userIDQuery := "SELECT id FROM users WHERE telegram_id = $1"
     var userID int
     err := db.conn.QueryRow(userIDQuery, telegramID).Scan(&userID)
     if err != nil {
         return fmt.Errorf("foydalanuvchi ID topilmadi: %w", err)
     }
 
-    activityQuery := "INSERT INTO user_activity (user_id, command) VALUES (?, ?)"
+    activityQuery := "INSERT INTO user_activity (user_id, command) VALUES ($1, $2)"
     _, err = db.conn.Exec(activityQuery, userID, command)
     if err != nil {
         return fmt.Errorf("faollik yozishda xatolik: %w", err)
