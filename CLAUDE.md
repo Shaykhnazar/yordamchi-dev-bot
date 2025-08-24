@@ -28,7 +28,7 @@ The bot requires a `.env` file with:
 ```
 BOT_TOKEN=your_bot_token_from_botfather
 BOT_MODE=webhook
-PORT=8090
+APP_PORT=8090
 ```
 
 The bot can run in two modes:

@@ -69,10 +69,10 @@ func NewBotWithDB(token string, config *handlers.Config, db *database.DB) *Bot {
 	}
 }
 
-func (b *Bot) Start() error {
+func (b *Bot) Start(appPort string) error {
 	http.HandleFunc("/webhook", b.handleWebhook)
-	log.Println("Server 8090 portda ishlamoqda...")
-	return http.ListenAndServe(":8090", nil)
+	log.Printf("Server %v portda ishlamoqda...", appPort)
+	return http.ListenAndServe(":"+appPort, nil)
 }
 
 func (b *Bot) handleWebhook(w http.ResponseWriter, r *http.Request) {

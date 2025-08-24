@@ -49,7 +49,12 @@ func main() {
     log.Printf("🤖 %s (v%s) %s bilan ishga tushdi!", 
         config.Bot.Name, config.Bot.Version, dbType)
     
-    if err := bot.Start(); err != nil {
+    appPort := os.Getenv("APP_PORT")
+    if appPort == "" {
+        log.Fatal("APP_PORT environment variable topilmadi. .env faylini tekshiring!")
+    }
+
+    if err := bot.Start(appPort); err != nil {
         log.Fatal("Bot'ni ishga tushirishda xatolik:", err)
     }
 }
