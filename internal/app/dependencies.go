@@ -53,10 +53,12 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	// Create and register middlewares
 	loggingMiddleware := middleware.NewLoggingMiddleware(logger)
 	authMiddleware := middleware.NewAuthMiddleware(userService, logger)
+	activityMiddleware := middleware.NewActivityMiddleware(db, logger)
 	rateLimitMiddleware := middleware.NewRateLimitMiddleware(10, time.Minute, logger) // 10 requests per minute
 
 	router.RegisterMiddleware(loggingMiddleware)
 	router.RegisterMiddleware(authMiddleware)
+	router.RegisterMiddleware(activityMiddleware) // Log after auth, before rate limiting
 	router.RegisterMiddleware(rateLimitMiddleware)
 
 	// Create and register command handlers
@@ -69,7 +71,7 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	haqidaCommand := commands.NewHaqidaCommand(config, logger)
 	vaqtCommand := commands.NewVaqtCommand(logger)
 	salomCommand := commands.NewSalomCommand(logger)
-	statsCommand := commands.NewStatsCommand(userService, startTime, logger)
+	statsCommand := commands.NewStatsCommand(userService, db, startTime, logger)
 	weatherCommand := commands.NewWeatherCommand(weatherService, logger)
 
 	router.RegisterHandler(startCommand)

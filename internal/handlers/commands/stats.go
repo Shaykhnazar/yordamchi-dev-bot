@@ -6,20 +6,23 @@ import (
 	"strings"
 	"time"
 
+	"yordamchi-dev-bot/database"
 	"yordamchi-dev-bot/internal/domain"
 )
 
 // StatsCommand handles /stats command for user statistics
 type StatsCommand struct {
 	userService domain.UserService
+	db          *database.DB
 	startTime   time.Time
 	logger      domain.Logger
 }
 
 // NewStatsCommand creates a new stats command handler
-func NewStatsCommand(userService domain.UserService, startTime time.Time, logger domain.Logger) *StatsCommand {
+func NewStatsCommand(userService domain.UserService, db *database.DB, startTime time.Time, logger domain.Logger) *StatsCommand {
 	return &StatsCommand{
 		userService: userService,
+		db:          db,
 		startTime:   startTime,
 		logger:      logger,
 	}
@@ -27,8 +30,8 @@ func NewStatsCommand(userService domain.UserService, startTime time.Time, logger
 
 // Handle processes the /stats command
 func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
-	// Get user statistics
-	stats, err := h.userService.GetStats(ctx)
+	// Get basic user statistics
+	totalUsers, err := h.db.GetUserStats()
 	if err != nil {
 		h.logger.Error("Failed to get user stats", "error", err)
 		return &domain.Response{
@@ -37,28 +40,51 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 		}, nil
 	}
 
+	// Get daily statistics
+	dailyStats, err := h.db.GetDailyStats()
+	if err != nil {
+		h.logger.Error("Failed to get daily stats", "error", err)
+		dailyStats = make(map[string]int) // Continue with empty stats
+	}
+
+	// Get popular commands
+	popularCommands, err := h.db.GetPopularCommands(5)
+	if err != nil {
+		h.logger.Error("Failed to get popular commands", "error", err)
+		popularCommands = make(map[string]int)
+	}
+
 	uptime := time.Since(h.startTime)
 	
 	message := fmt.Sprintf(
 		"📊 <b>Bot Statistikasi</b>\n\n"+
 		"👥 <b>Foydalanuvchilar:</b>\n"+
 		"   • Jami: %d\n"+
-		"   • Faol: %d\n"+
 		"   • Bugun yangi: %d\n"+
 		"   • Bugun faol: %d\n\n"+
+		"📈 <b>Faollik:</b>\n"+
+		"   • Bugun buyruqlar: %d\n\n"+
 		"⏱️ <b>Uptime:</b> %s\n"+
 		"🔄 <b>Arxitektura:</b> Clean Architecture\n"+
 		"🚀 <b>Versiya:</b> 1.0.0",
-		stats.TotalUsers,
-		stats.ActiveUsers, 
-		stats.NewToday,
-		stats.ActiveToday,
+		totalUsers,
+		dailyStats["new_users_today"],
+		dailyStats["active_users_today"],
+		dailyStats["activities_today"],
 		uptime.Truncate(time.Second).String(),
 	)
 
+	// Add popular commands if available
+	if len(popularCommands) > 0 {
+		message += "\n\n🔥 <b>Populyar buyruqlar:</b>\n"
+		for cmd, count := range popularCommands {
+			message += fmt.Sprintf("   • %s: %d\n", cmd, count)
+		}
+	}
+
 	h.logger.Info("Stats command processed", 
 		"user_id", cmd.User.TelegramID,
-		"total_users", stats.TotalUsers)
+		"total_users", totalUsers)
 
 	return &domain.Response{
 		Text:      message,

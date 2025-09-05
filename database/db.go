@@ -100,11 +100,117 @@ func (db *DB) LogUserActivity(telegramID int64, command string) error {
     return nil
 }
 
+// UserActivity represents user activity data
+type UserActivity struct {
+    ID        int64     `json:"id"`
+    UserID    int64     `json:"user_id"`
+    Command   string    `json:"command"`
+    CreatedAt time.Time `json:"created_at"`
+}
+
+// GetUserStats returns total user count
 func (db *DB) GetUserStats() (int, error) {
     query := "SELECT COUNT(*) FROM users"
     var count int
     err := db.conn.QueryRow(query).Scan(&count)
     return count, err
+}
+
+// GetUserActivities returns recent activities for a user
+func (db *DB) GetUserActivities(telegramID int64, limit int) ([]UserActivity, error) {
+    query := `
+    SELECT ua.id, ua.user_id, ua.command, ua.timestamp 
+    FROM user_activity ua
+    JOIN users u ON ua.user_id = u.id
+    WHERE u.telegram_id = ?
+    ORDER BY ua.timestamp DESC 
+    LIMIT ?`
+
+    rows, err := db.conn.Query(query, telegramID, limit)
+    if err != nil {
+        return nil, fmt.Errorf("faollikni olishda xatolik: %w", err)
+    }
+    defer rows.Close()
+
+    var activities []UserActivity
+    for rows.Next() {
+        var activity UserActivity
+        err := rows.Scan(
+            &activity.ID,
+            &activity.UserID,
+            &activity.Command,
+            &activity.CreatedAt,
+        )
+        if err != nil {
+            return nil, fmt.Errorf("faollik ma'lumotlarini o'qishda xatolik: %w", err)
+        }
+        activities = append(activities, activity)
+    }
+
+    return activities, nil
+}
+
+// GetPopularCommands returns most used commands
+func (db *DB) GetPopularCommands(limit int) (map[string]int, error) {
+    query := `
+    SELECT command, COUNT(*) as count 
+    FROM user_activity 
+    GROUP BY command 
+    ORDER BY count DESC 
+    LIMIT ?`
+
+    rows, err := db.conn.Query(query, limit)
+    if err != nil {
+        return nil, fmt.Errorf("populyar buyruqlarni olishda xatolik: %w", err)
+    }
+    defer rows.Close()
+
+    commands := make(map[string]int)
+    for rows.Next() {
+        var command string
+        var count int
+        err := rows.Scan(&command, &count)
+        if err != nil {
+            return nil, fmt.Errorf("buyruq ma'lumotlarini o'qishda xatolik: %w", err)
+        }
+        commands[command] = count
+    }
+
+    return commands, nil
+}
+
+// GetDailyStats returns activity stats for today
+func (db *DB) GetDailyStats() (map[string]int, error) {
+    stats := make(map[string]int)
+    
+    // Total users today
+    query := "SELECT COUNT(*) FROM users WHERE DATE(created_at) = DATE('now')"
+    var newUsersToday int
+    err := db.conn.QueryRow(query).Scan(&newUsersToday)
+    if err != nil {
+        return nil, fmt.Errorf("bugungi foydalanuvchilar sonini olishda xatolik: %w", err)
+    }
+    stats["new_users_today"] = newUsersToday
+    
+    // Activities today
+    query = "SELECT COUNT(*) FROM user_activity WHERE DATE(timestamp) = DATE('now')"
+    var activitiesToday int
+    err = db.conn.QueryRow(query).Scan(&activitiesToday)
+    if err != nil {
+        return nil, fmt.Errorf("bugungi faollik sonini olishda xatolik: %w", err)
+    }
+    stats["activities_today"] = activitiesToday
+    
+    // Active users today
+    query = "SELECT COUNT(DISTINCT user_id) FROM user_activity WHERE DATE(timestamp) = DATE('now')"
+    var activeUsersToday int
+    err = db.conn.QueryRow(query).Scan(&activeUsersToday)
+    if err != nil {
+        return nil, fmt.Errorf("bugungi faol foydalanuvchilar sonini olishda xatolik: %w", err)
+    }
+    stats["active_users_today"] = activeUsersToday
+    
+    return stats, nil
 }
 
 func (db *DB) Close() error {
