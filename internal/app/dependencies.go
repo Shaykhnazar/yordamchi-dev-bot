@@ -62,11 +62,25 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	helpCommand := commands.NewHelpCommand(router, config.Messages.Help, logger)
 	pingCommand := commands.NewPingCommand(logger, startTime)
 	githubCommand := commands.NewGitHubCommand(githubService, logger)
+	hazilCommand := commands.NewHazilCommand(config.Jokes, logger)
+	iqtibosCommand := commands.NewIqtibosCommand(config.Quotes, logger)
+	haqidaCommand := commands.NewHaqidaCommand(config, logger)
+	vaqtCommand := commands.NewVaqtCommand(logger)
+	salomCommand := commands.NewSalomCommand(logger)
+	statsCommand := commands.NewStatsCommand(userService, startTime, logger)
+	weatherCommand := commands.NewWeatherCommand(weatherService, logger)
 
 	router.RegisterHandler(startCommand)
 	router.RegisterHandler(helpCommand)
 	router.RegisterHandler(pingCommand)
 	router.RegisterHandler(githubCommand)
+	router.RegisterHandler(hazilCommand)
+	router.RegisterHandler(iqtibosCommand)
+	router.RegisterHandler(haqidaCommand)
+	router.RegisterHandler(vaqtCommand)
+	router.RegisterHandler(salomCommand)
+	router.RegisterHandler(statsCommand)
+	router.RegisterHandler(weatherCommand)
 
 	// Start background tasks
 	go func() {
