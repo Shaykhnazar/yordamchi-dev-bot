@@ -1,15 +1,18 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 	"yordamchi-dev-bot/database"
 	"yordamchi-dev-bot/handlers"
+	"yordamchi-dev-bot/internal/services"
 )
 
 type Bot struct {
@@ -163,6 +166,10 @@ func (b *Bot) processMessage(msg Message) {
 		} else {
 			b.sendMessage(chatID, fmt.Sprintf("📊 Jami foydalanuvchilar: %d", count))
 		}
+	case strings.HasPrefix(msg.Text, "/repo "):
+		b.handleRepoCommand(chatID, msg.Text)
+	case strings.HasPrefix(msg.Text, "/user "):
+		b.handleUserCommand(chatID, msg.Text)
 
 	default:
 		if strings.HasPrefix(text, "/") {
@@ -197,4 +204,65 @@ func (b *Bot) sendMessage(chatID int, text string) error {
 	}
 
 	return nil
+}
+
+// handleRepoCommand handles GitHub repository lookup command
+func (b *Bot) handleRepoCommand(chatID int, text string) {
+	parts := strings.Fields(text)
+	if len(parts) != 2 {
+		b.sendMessage(chatID, "❌ Format: /repo owner/repository\n\nMisol: /repo torvalds/linux")
+		return
+	}
+
+	repoParts := strings.Split(parts[1], "/")
+	if len(repoParts) != 2 {
+		b.sendMessage(chatID, "❌ Format: /repo owner/repository\n\nMisol: /repo torvalds/linux")
+		return
+	}
+
+	owner := repoParts[0]
+	repo := repoParts[1]
+
+	logger := log.New(os.Stdout, "[GitHub] ", log.LstdFlags)
+	github := services.NewGitHubService(logger)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	repository, err := github.GetRepository(ctx, owner, repo)
+	if err != nil {
+		log.Printf("GitHub repository error: %v", err)
+		b.sendMessage(chatID, "❌ Repository topilmadi yoki xatolik yuz berdi. Repository nomini tekshiring.")
+		return
+	}
+
+	message := github.FormatRepository(repository)
+	b.sendMessage(chatID, message)
+}
+
+// handleUserCommand handles GitHub user lookup command
+func (b *Bot) handleUserCommand(chatID int, text string) {
+	parts := strings.Fields(text)
+	if len(parts) != 2 {
+		b.sendMessage(chatID, "❌ Format: /user username\n\nMisol: /user torvalds")
+		return
+	}
+
+	username := parts[1]
+
+	logger := log.New(os.Stdout, "[GitHub] ", log.LstdFlags)
+	github := services.NewGitHubService(logger)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	user, err := github.GetUser(ctx, username)
+	if err != nil {
+		log.Printf("GitHub user error: %v", err)
+		b.sendMessage(chatID, "❌ Foydalanuvchi topilmadi yoki xatolik yuz berdi. Username'ni tekshiring.")
+		return
+	}
+
+	message := github.FormatUser(user)
+	b.sendMessage(chatID, message)
 }
