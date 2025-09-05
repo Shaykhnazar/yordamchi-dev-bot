@@ -134,19 +134,8 @@ devmate-bot/
 │       ├── development.env
 │       ├── staging.env
 │       └── production.env
-├── deployments/                   # Deployment configurations
-│   ├── docker/
-│   │   ├── Dockerfile
-│   │   ├── docker-compose.yml
-│   │   └── docker-compose.prod.yml
-│   └── k8s/                      # Kubernetes manifests
-│       ├── namespace.yaml
-│       ├── deployment.yaml
-│       ├── service.yaml
-│       └── ingress.yaml
-├── scripts/                      # Build and deployment scripts
+├── scripts/                      # Build and development scripts
 │   ├── build.sh
-│   ├── deploy.sh
 │   ├── migrate.sh
 │   └── test.sh
 ├── tests/                        # Test files
@@ -161,8 +150,7 @@ devmate-bot/
 │       └── bot/
 ├── docs/                         # Documentation
 │   ├── api/
-│   ├── development/
-│   └── deployment/
+│   └── development/
 ├── tools/                        # Development tools
 │   ├── mockgen/
 │   └── migrate/
@@ -561,134 +549,61 @@ func (h *HealthChecker) Check(ctx context.Context) *HealthStatus {
 }
 ```
 
-## 🚀 Deployment Architecture
+## 📈 Performance & Scalability
 
-### 1. Container Strategy
-```dockerfile
-# Multi-stage build for optimized image size
-FROM golang:1.21-alpine AS builder
+### 1. Database Optimization
+```go
+// Connection pooling and query optimization
+type DatabaseConfig struct {
+    MaxOpenConns    int
+    MaxIdleConns    int
+    ConnMaxLifetime time.Duration
+    QueryTimeout    time.Duration
+}
 
-WORKDIR /app
-COPY go.mod go.sum ./
-RUN go mod download
-
-COPY . .
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main cmd/bot/main.go
-
-FROM alpine:latest
-RUN apk --no-cache add ca-certificates tzdata
-WORKDIR /root/
-
-COPY --from=builder /app/main .
-COPY --from=builder /app/configs ./configs
-
-EXPOSE 8080
-CMD ["./main"]
+func (db *DB) Configure(config DatabaseConfig) {
+    db.conn.SetMaxOpenConns(config.MaxOpenConns)
+    db.conn.SetMaxIdleConns(config.MaxIdleConns)
+    db.conn.SetConnMaxLifetime(config.ConnMaxLifetime)
+}
 ```
 
-### 2. Kubernetes Deployment
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: devmate-bot
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: devmate-bot
-  template:
-    metadata:
-      labels:
-        app: devmate-bot
-    spec:
-      containers:
-      - name: bot
-        image: devmate-bot:latest
-        ports:
-        - containerPort: 8080
-        env:
-        - name: BOT_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: bot-secrets
-              key: telegram-token
-        resources:
-          requests:
-            memory: "64Mi"
-            cpu: "250m"
-          limits:
-            memory: "128Mi"
-            cpu: "500m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8080
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8080
-          initialDelaySeconds: 5
-          periodSeconds: 5
+### 2. Caching Strategy
+```go
+type CacheManager interface {
+    Get(ctx context.Context, key string) (interface{}, error)
+    Set(ctx context.Context, key string, value interface{}, ttl time.Duration) error
+    Delete(ctx context.Context, key string) error
+}
+
+type MemoryCache struct {
+    data   map[string]*CacheItem
+    mutex  sync.RWMutex
+    logger logger.Logger
+}
 ```
 
-## 🔄 CI/CD Pipeline
+### 3. Request Throttling
+```go
+type ThrottleManager struct {
+    limits map[string]*rate.Limiter
+    mutex  sync.RWMutex
+}
 
-### 1. GitHub Actions Workflow
-```yaml
-name: CI/CD Pipeline
-
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-go@v3
-      with:
-        go-version: 1.21
+func (t *ThrottleManager) Allow(userID string) bool {
+    t.mutex.RLock()
+    limiter, exists := t.limits[userID]
+    t.mutex.RUnlock()
     
-    - name: Run tests
-      run: |
-        go test -v -cover ./...
-        go test -v -race ./...
+    if !exists {
+        t.mutex.Lock()
+        limiter = rate.NewLimiter(1, 3) // 1 request per second, burst of 3
+        t.limits[userID] = limiter
+        t.mutex.Unlock()
+    }
     
-    - name: Run linter
-      uses: golangci/golangci-lint-action@v3
-      with:
-        version: latest
-
-  build:
-    needs: test
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Build Docker image
-      run: docker build -t devmate-bot:${{ github.sha }} .
-    
-    - name: Push to registry
-      if: github.ref == 'refs/heads/main'
-      run: |
-        echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
-        docker push devmate-bot:${{ github.sha }}
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    steps:
-    - name: Deploy to production
-      run: |
-        # Deployment scripts
-        kubectl set image deployment/devmate-bot bot=devmate-bot:${{ github.sha }}
+    return limiter.Allow()
+}
 ```
 
 This architecture documentation provides a comprehensive overview of the system design, making it easy for new developers to understand the codebase and for Claude Code to generate appropriate code following the established patterns.
