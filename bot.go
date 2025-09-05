@@ -170,6 +170,10 @@ func (b *Bot) processMessage(msg Message) {
 		b.handleRepoCommand(chatID, msg.Text)
 	case strings.HasPrefix(msg.Text, "/user "):
 		b.handleUserCommand(chatID, msg.Text)
+	case strings.HasPrefix(msg.Text, "/weather "):
+		b.handleWeatherCommand(chatID, msg.Text)
+	case strings.HasPrefix(msg.Text, "/ob-havo "):
+		b.handleWeatherCommand(chatID, msg.Text)
 
 	default:
 		if strings.HasPrefix(text, "/") {
@@ -264,5 +268,33 @@ func (b *Bot) handleUserCommand(chatID int, text string) {
 	}
 
 	message := github.FormatUser(user)
+	b.sendMessage(chatID, message)
+}
+
+// handleWeatherCommand handles weather lookup command
+func (b *Bot) handleWeatherCommand(chatID int, text string) {
+	parts := strings.Fields(text)
+	if len(parts) < 2 {
+		b.sendMessage(chatID, "❌ Shahar nomini kiriting\n\nFormat: /weather <shahar>\nMisol: /weather Tashkent")
+		return
+	}
+
+	// Join all parts except the command to support multi-word city names
+	city := strings.Join(parts[1:], " ")
+
+	logger := log.New(os.Stdout, "[Weather] ", log.LstdFlags)
+	weather := services.NewWeatherService(logger)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
+	data, err := weather.GetWeather(ctx, city)
+	if err != nil {
+		log.Printf("Weather error: %v", err)
+		b.sendMessage(chatID, "❌ Ob-havo ma'lumotini olishda xatolik yuz berdi. Shahar nomini tekshiring.")
+		return
+	}
+
+	message := weather.FormatWeather(data)
 	b.sendMessage(chatID, message)
 }
