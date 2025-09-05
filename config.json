@@ -7,7 +7,7 @@
     },
     "messages": {
         "welcome": "🎉 Assalomu alaykum! Men Yordamchi Dev Bot. Go dasturlash tilini o'rganishingizda yordam beraman!",
-        "help": "🤖 Yordamchi Dev Bot Buyruqlari:\n\n<b>Asosiy buyruqlar:</b>\n/start - Botni ishga tushirish\n/help - Bu yordam xabari\n/ping - Bot ishlaganligini tekshirish\n/haqida - Bot haqida ma'lumot\n/vaqt - Hozirgi vaqt\n/stats - Foydalanuvchilar statistikasi\n\n<b>Ko'ngilochar:</b>\n/hazil - Tasodifiy hazil\n/iqtibos - Motivatsion iqtibos\n\n<b>GitHub Integration:</b>\n/repo <owner/name> - Repository ma'lumoti\n/user <username> - Foydalanuvchi profili\n\n<b>Ob-havo:</b>\n/weather <shahar> - Ob-havo ma'lumoti\n/ob-havo <shahar> - Ob-havo (o'zbekcha)\n\n🚀 <i>Week 2: External API Integration completed!</i>",
+        "help": "🤖 Yordamchi Dev Bot Buyruqlari:\n\n<b>Asosiy buyruqlar:</b>\n/start - Botni ishga tushirish\n/help - Bu yordam xabari\n/ping - Bot ishlaganligini tekshirish\n/haqida - Bot haqida ma'lumot\n/vaqt - Hozirgi vaqt\n/salom - Shaxsiylashtirilgan salom\n/stats - Foydalanuvchilar statistikasi\n\n<b>Ko'ngilochar:</b>\n/hazil - Tasodifiy hazil\n/iqtibos - Motivatsion iqtibos\n\n<b>GitHub Integration:</b>\n/repo &lt;owner/name&gt; - Repository ma'lumoti\n/user &lt;username&gt; - Foydalanuvchi profili\n\n<b>Ob-havo:</b>\n/weather &lt;shahar&gt; - Ob-havo ma'lumoti\n/ob-havo &lt;shahar&gt; - Ob-havo (o'zbekcha)\n\n🚀 <i>Week 2: External API Integration completed!</i>",
         "unknown_command": "❓ Noma'lum buyruq. /help yozing"
     },
     "jokes": [

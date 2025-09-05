@@ -1,8 +1,10 @@
 package app
 
 import (
+	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"yordamchi-dev-bot/database"
@@ -118,22 +120,42 @@ func NewStructuredLogger() *StructuredLogger {
 
 // Debug logs debug messages
 func (l *StructuredLogger) Debug(msg string, args ...interface{}) {
-	l.logger.Printf("DEBUG: "+msg, args...)
+	l.logWithFields("DEBUG", msg, args...)
 }
 
 // Info logs info messages
 func (l *StructuredLogger) Info(msg string, args ...interface{}) {
-	l.logger.Printf("INFO: "+msg, args...)
+	l.logWithFields("INFO", msg, args...)
 }
 
 // Warn logs warning messages
 func (l *StructuredLogger) Warn(msg string, args ...interface{}) {
-	l.logger.Printf("WARN: "+msg, args...)
+	l.logWithFields("WARN", msg, args...)
 }
 
 // Error logs error messages
 func (l *StructuredLogger) Error(msg string, args ...interface{}) {
-	l.logger.Printf("ERROR: "+msg, args...)
+	l.logWithFields("ERROR", msg, args...)
+}
+
+// logWithFields formats structured logging with key-value pairs
+func (l *StructuredLogger) logWithFields(level, msg string, args ...interface{}) {
+	if len(args) == 0 {
+		l.logger.Printf("%s: %s", level, msg)
+		return
+	}
+	
+	// Format key-value pairs
+	var fields []string
+	for i := 0; i < len(args); i += 2 {
+		if i+1 < len(args) {
+			fields = append(fields, fmt.Sprintf("%v=%v", args[i], args[i+1]))
+		} else {
+			fields = append(fields, fmt.Sprintf("extra=%v", args[i]))
+		}
+	}
+	
+	l.logger.Printf("%s: %s %s", level, msg, strings.Join(fields, " "))
 }
 
 // With creates a new logger with additional context (simplified implementation)
