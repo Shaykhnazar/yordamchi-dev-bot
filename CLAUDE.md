@@ -130,3 +130,37 @@ Bot behavior is configured via `config.json` which contains:
 - All user interactions are logged with username and message content
 - The project supports both development (SQLite) and production (PostgreSQL) databases
 - Comprehensive documentation provides learning path and implementation guidance
+
+## 🔄 Development Rules
+
+### Progressive Implementation
+When implementing features from the documentation:
+
+1. **Step-by-Step Implementation**: Follow documented weeks progressively (Week 1 → Week 2 → Week 3 → Week 4)
+2. **Commit After Each Part**: After completing each significant feature or day's implementation, commit changes before continuing
+3. **Sync with Documentation**: Ensure implemented code matches the documented patterns and explanations
+
+### Learning Documentation Generation
+For each implementation step:
+
+1. **Create Learning Files**: Generate Uzbek language code explanations and definitions in `learn/` directory
+2. **File Structure**: Create separate files for each major concept or implementation step
+3. **Content Focus**: Include Go concepts, programming patterns, and code explanations in Uzbek
+4. **Progressive Learning**: Build upon previous concepts with each new file
+
+### Example Learning File Structure:
+```
+learn/
+├── week1_go_asoslari.md          # Week 1: Go basics and fundamentals
+├── week1_struct_va_interface.md   # Week 1: Structs and interfaces  
+├── week2_http_client.md          # Week 2: HTTP client concepts
+├── week2_json_parsing.md         # Week 2: JSON parsing and handling
+├── week3_database_patterns.md    # Week 3: Database design patterns
+├── week4_middleware_patterns.md  # Week 4: Middleware and architecture
+└── ...
+```
+
+### Implementation Order
+1. ✅ **Week 1 & 3**: Already implemented (foundation + database)
+2. 📖 **Week 2**: External API integrations (GitHub, Stack Overflow, weather)
+3. 📖 **Week 4**: Advanced patterns (interfaces, middleware, testing, security)
