@@ -35,15 +35,7 @@ func NewValidationMiddleware(logger domain.Logger) *ValidationMiddleware {
 		MinArgs:     2,
 		MaxArgs:     5,
 		Description: "Weather command requires a city name",
-		Usage:       "/weather <city_name>",
-	}
-
-	validators["/ob-havo"] = &CommandValidator{
-		Pattern:     regexp.MustCompile(`^/ob-havo\s+[a-zA-Z\s\-']{2,50}$`),
-		MinArgs:     2,
-		MaxArgs:     5,
-		Description: "Ob-havo command requires a city name",
-		Usage:       "/ob-havo <shahar_nomi>",
+		Usage:       "/weather &lt;city_name&gt;",
 	}
 
 	// GitHub command validation
@@ -52,7 +44,7 @@ func NewValidationMiddleware(logger domain.Logger) *ValidationMiddleware {
 		MinArgs:     2,
 		MaxArgs:     2,
 		Description: "Repository command requires owner/repo format",
-		Usage:       "/repo <owner/repository>",
+		Usage:       "/repo &lt;owner/repository&gt;",
 	}
 
 	validators["/user"] = &CommandValidator{
@@ -60,7 +52,7 @@ func NewValidationMiddleware(logger domain.Logger) *ValidationMiddleware {
 		MinArgs:     2,
 		MaxArgs:     2,
 		Description: "User command requires a GitHub username",
-		Usage:       "/user <username>",
+		Usage:       "/user &lt;username&gt;",
 	}
 
 	return &ValidationMiddleware{
@@ -185,7 +177,6 @@ func (m *ValidationMiddleware) sanitizeInput(input string) string {
 func (m *ValidationMiddleware) getExampleUsage(command string) string {
 	examples := map[string]string{
 		"/weather": "/weather London",
-		"/ob-havo": "/ob-havo Toshkent",
 		"/repo":    "/repo microsoft/vscode",
 		"/user":    "/user octocat",
 	}

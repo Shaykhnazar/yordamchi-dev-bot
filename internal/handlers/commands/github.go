@@ -61,7 +61,7 @@ func (h *GitHubCommand) Description() string {
 
 // Usage returns the command usage instructions
 func (h *GitHubCommand) Usage() string {
-	return "/repo <owner/name> - Repository ma'lumoti\n/user <username> - Foydalanuvchi profili"
+	return "/repo &lt;owner/name&gt; - Repository ma'lumoti\n/user &lt;username&gt; - Foydalanuvchi profili"
 }
 
 // handleRepoCommand handles repository lookup

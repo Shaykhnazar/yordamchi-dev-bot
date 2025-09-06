@@ -34,7 +34,6 @@ func TestValidationMiddleware_ValidCommands(t *testing.T) {
 		valid   bool
 	}{
 		{"Valid weather command", "/weather London", true},
-		{"Valid ob-havo command", "/ob-havo Toshkent", true},
 		{"Valid repo command", "/repo microsoft/vscode", true},
 		{"Valid user command", "/user octocat", true},
 		{"Basic command without validation", "/start", true},

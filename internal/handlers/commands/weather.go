@@ -9,7 +9,7 @@ import (
 	"yordamchi-dev-bot/internal/services"
 )
 
-// WeatherCommand handles /weather and /ob-havo commands
+// WeatherCommand handles /weather command
 type WeatherCommand struct {
 	weatherService *services.WeatherService
 	logger         domain.Logger
@@ -49,23 +49,7 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	// Format response based on command language
 	var message string
 	command := strings.ToLower(parts[0])
-	if command == "/ob-havo" {
-		// Uzbek response
-		message = fmt.Sprintf(
-			"🌤️ <b>%s shahrida ob-havo</b>\n\n"+
-			"🌡️ <b>Harorat:</b> %.1f°C\n"+
-			"💧 <b>Namlik:</b> %d%%\n"+
-			"💨 <b>Shamol:</b> %.1f km/soat\n"+
-			"📊 <b>Bosim:</b> %d hPa\n"+
-			"☁️ <b>Holat:</b> %s",
-			weather.Location,
-			weather.Temperature,
-			weather.Humidity,
-			weather.WindSpeed,
-			weather.Pressure,
-			weather.Description,
-		)
-	} else {
+	if command == "/weather" {
 		// English response
 		message = fmt.Sprintf(
 			"🌤️ <b>Weather in %s</b>\n\n"+
@@ -97,7 +81,7 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 // CanHandle checks if this handler can process the command
 func (h *WeatherCommand) CanHandle(command string) bool {
 	cmd := strings.ToLower(strings.TrimSpace(command))
-	return strings.HasPrefix(cmd, "/weather") || strings.HasPrefix(cmd, "/ob-havo")
+	return strings.HasPrefix(cmd, "/weather")
 }
 
 // Description returns the command description
@@ -107,5 +91,5 @@ func (h *WeatherCommand) Description() string {
 
 // Usage returns the command usage
 func (h *WeatherCommand) Usage() string {
-	return "/weather <shahar> yoki /ob-havo <shahar> - Ob-havo ma'lumoti"
+	return "/weather &lt;city&gt; - Ob-havo ma'lumoti"
 }

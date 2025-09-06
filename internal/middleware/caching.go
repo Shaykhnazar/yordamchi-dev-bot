@@ -24,7 +24,6 @@ func NewCachingMiddleware(logger domain.Logger) *CachingMiddleware {
 	// Commands that should be cached (expensive operations)
 	cacheableCommands := map[string]bool{
 		"/weather":   true,
-		"/ob-havo":   true,
 		"/repo":      true,
 		"/user":      true,
 	}
@@ -102,7 +101,7 @@ func (m *CachingMiddleware) generateCacheKey(userID int64, command string) strin
 // getCacheTTL returns appropriate TTL for different command types
 func (m *CachingMiddleware) getCacheTTL(command string) time.Duration {
 	switch command {
-	case "/weather", "/ob-havo":
+	case "/weather":
 		return 15 * time.Minute // Weather changes more frequently
 	case "/repo", "/user":
 		return 30 * time.Minute // GitHub data changes less frequently
