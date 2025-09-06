@@ -52,14 +52,21 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 
 	// Create and register middlewares
 	loggingMiddleware := middleware.NewLoggingMiddleware(logger)
+	validationMiddleware := middleware.NewValidationMiddleware(logger)
+	cachingMiddleware := middleware.NewCachingMiddleware(logger)
+	metricsMiddleware := middleware.NewMetricsMiddleware(logger)
 	authMiddleware := middleware.NewAuthMiddleware(userService, logger)
 	activityMiddleware := middleware.NewActivityMiddleware(db, logger)
 	rateLimitMiddleware := middleware.NewRateLimitMiddleware(10, time.Minute, logger) // 10 requests per minute
 
-	router.RegisterMiddleware(loggingMiddleware)
-	router.RegisterMiddleware(authMiddleware)
-	router.RegisterMiddleware(activityMiddleware) // Log after auth, before rate limiting
-	router.RegisterMiddleware(rateLimitMiddleware)
+	// Register middleware in optimal order
+	router.RegisterMiddleware(loggingMiddleware)     // Log first
+	router.RegisterMiddleware(metricsMiddleware)     // Metrics collection
+	router.RegisterMiddleware(validationMiddleware)  // Validate input early
+	router.RegisterMiddleware(cachingMiddleware)     // Cache before expensive operations
+	router.RegisterMiddleware(authMiddleware)        // Authentication
+	router.RegisterMiddleware(activityMiddleware)    // Log activity after auth
+	router.RegisterMiddleware(rateLimitMiddleware)   // Rate limiting last
 
 	// Create and register command handlers
 	startCommand := commands.NewStartCommand(config.Messages.Welcome, logger)
@@ -73,6 +80,10 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	salomCommand := commands.NewSalomCommand(logger)
 	statsCommand := commands.NewStatsCommand(userService, db, startTime, logger)
 	weatherCommand := commands.NewWeatherCommand(weatherService, logger)
+	
+	// Create metrics provider and metrics command
+	metricsProvider := NewMetricsProvider(metricsMiddleware, cachingMiddleware)
+	metricsCommand := commands.NewMetricsCommand(metricsProvider, logger)
 
 	router.RegisterHandler(startCommand)
 	router.RegisterHandler(helpCommand)
@@ -85,6 +96,7 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	router.RegisterHandler(salomCommand)
 	router.RegisterHandler(statsCommand)
 	router.RegisterHandler(weatherCommand)
+	router.RegisterHandler(metricsCommand)
 
 	// Start background tasks
 	go func() {
