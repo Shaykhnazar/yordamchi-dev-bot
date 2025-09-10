@@ -42,8 +42,17 @@ func (r *CommandRouter) Route(ctx context.Context, cmd *domain.Command) (*domain
 
 	// Find appropriate handler
 	var handler domain.CommandHandler
+	// Extract just the command part (first word) for matching
+	parts := strings.Fields(cmd.Text)
+	if len(parts) == 0 {
+		return &domain.Response{
+			Text:      "❓ Noma'lum buyruq. /help yozing",
+			ParseMode: "HTML",
+		}, nil
+	}
+	command := parts[0]
 	for _, h := range r.handlers {
-		if h.CanHandle(cmd.Text) {
+		if h.CanHandle(command) {
 			handler = h
 			break
 		}
