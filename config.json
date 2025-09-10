@@ -1,13 +1,13 @@
 {
     "bot": {
-        "name": "Yordamchi Dev Bot",
-        "version": "1.0.0",
-        "description": "Go tilida yaratilgan dasturchi yordamchi bot",
+        "name": "Yordamchi Dev Bot - AI Assistant",
+        "version": "2.0.0",
+        "description": "AI-powered development assistant with task analysis and project management",
         "author": "Golang O'rganish Guruhi"
     },
     "messages": {
-        "welcome": "🎉 Assalomu alaykum! Men Yordamchi Dev Bot. Go dasturlash tilini o'rganishingizda yordam beraman!",
-        "help": "🤖 Yordamchi Dev Bot Buyruqlari:\n\n<b>Asosiy buyruqlar:</b>\n/start - Botni ishga tushirish\n/help - Bu yordam xabari\n/ping - Bot ishlaganligini tekshirish\n/haqida - Bot haqida ma'lumot\n/vaqt - Hozirgi vaqt\n/salom - Shaxsiylashtirilgan salom\n/stats - Foydalanuvchilar statistikasi\n\n<b>Ko'ngilochar:</b>\n/hazil - Tasodifiy hazil\n/iqtibos - Motivatsion iqtibos\n\n<b>GitHub Integration:</b>\n/repo &lt;owner/name&gt; - Repository ma'lumoti\n/user &lt;username&gt; - Foydalanuvchi profili\n\n<b>Ob-havo:</b>\n/weather &lt;shahar&gt;",
+        "welcome": "🤖 Welcome to Yordamchi Dev Bot - AI Assistant!\n\n🎭 **Entertainment:** /hazil, /iqtibos\n🔧 **Utilities:** /ping, /stats, /weather, /github\n🚀 **AI Features:** /analyze, /create_project, /workload\n\nType /help for full command list!",
+        "help": "📚 **Available Commands:**\n\n🎭 **Fun & Quotes:**\n/hazil - Random programming joke\n/iqtibos - Motivational quote\n\n🔧 **Utilities:**\n/ping - Bot status\n/stats - Usage statistics\n/weather <city> - Weather info\n/github <user> - GitHub user info\n/metrics - Performance dashboard\n\n🚀 **AI Project Management:**\n/analyze <requirement> - Break down development tasks\n/create_project <name> - Create new project\n/add_member @user skills - Add team member\n/workload - Team workload analysis\n/list_projects - Show all projects\n/list_team - Show team members\n\n💡 Use `/help <command>` for detailed info!",
         "unknown_command": "❓ Noma'lum buyruq. /help yozing"
     },
     "jokes": [

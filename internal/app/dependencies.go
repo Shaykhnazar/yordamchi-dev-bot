@@ -27,6 +27,10 @@ type Dependencies struct {
 	GitHubService  *services.GitHubService
 	WeatherService *services.WeatherService
 	UserService    domain.UserService
+	
+	// DevTaskMaster Services
+	TaskAnalyzer   *services.TaskAnalyzer
+	TeamManager    *services.TeamManager
 
 	// Bot
 	StartTime time.Time
@@ -46,6 +50,10 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	githubService := services.NewGitHubService(serviceLogger)
 	weatherService := services.NewWeatherService(serviceLogger)
 	userService := NewUserService(db, logger)
+	
+	// Create DevTaskMaster services
+	taskAnalyzer := services.NewTaskAnalyzer()
+	teamManager := services.NewTeamManager()
 
 	// Create router
 	router := NewCommandRouter(logger)
@@ -84,7 +92,16 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	// Create metrics provider and metrics command
 	metricsProvider := NewMetricsProvider(metricsMiddleware, cachingMiddleware)
 	metricsCommand := commands.NewMetricsCommand(metricsProvider, logger)
+	
+	// Create DevTaskMaster command handlers
+	analyzeCommand := commands.NewAnalyzeCommand(taskAnalyzer, logger)
+	projectCommand := commands.NewProjectCommand(db, logger)
+	teamCommand := commands.NewTeamCommand(db, teamManager, logger)
+	workloadCommand := commands.NewWorkloadCommand(db, teamManager, logger)
+	listProjectsCommand := commands.NewListProjectsCommand(db, logger)
+	listTeamCommand := commands.NewListTeamCommand(db, logger)
 
+	// Register original commands
 	router.RegisterHandler(startCommand)
 	router.RegisterHandler(helpCommand)
 	router.RegisterHandler(pingCommand)
@@ -97,6 +114,14 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	router.RegisterHandler(statsCommand)
 	router.RegisterHandler(weatherCommand)
 	router.RegisterHandler(metricsCommand)
+	
+	// Register DevTaskMaster commands
+	router.RegisterHandler(analyzeCommand)
+	router.RegisterHandler(projectCommand)
+	router.RegisterHandler(teamCommand)
+	router.RegisterHandler(workloadCommand)
+	router.RegisterHandler(listProjectsCommand)
+	router.RegisterHandler(listTeamCommand)
 
 	// Start background tasks
 	go func() {
@@ -116,6 +141,8 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 		GitHubService:  githubService,
 		WeatherService: weatherService,
 		UserService:    userService,
+		TaskAnalyzer:   taskAnalyzer,
+		TeamManager:    teamManager,
 		StartTime:      startTime,
 	}, nil
 }
