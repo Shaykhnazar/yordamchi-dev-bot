@@ -32,6 +32,9 @@ type TelegramMessage struct {
 	Chat      *TelegramChat `json:"chat"`
 	Text      string        `json:"text"`
 	Date      int64         `json:"date"`
+	// File attachments
+	Document *domain.TelegramDocument `json:"document,omitempty"`
+	Photo    []domain.TelegramPhoto   `json:"photo,omitempty"`
 }
 
 // TelegramUser represents Telegram user
@@ -114,7 +117,12 @@ func (b *TelegramBot) handleHealth(w http.ResponseWriter, r *http.Request) {
 
 // processUpdate processes a single Telegram update
 func (b *TelegramBot) processUpdate(update *TelegramUpdate) {
-	if update.Message == nil || update.Message.Text == "" {
+	if update.Message == nil {
+		return
+	}
+	
+	// Allow messages with files even if they don't have text
+	if update.Message.Text == "" && update.Message.Document == nil && len(update.Message.Photo) == 0 {
 		return
 	}
 
@@ -151,7 +159,7 @@ func (b *TelegramBot) processUpdate(update *TelegramUpdate) {
 
 // convertToDomainCommand converts Telegram message to domain command
 func (b *TelegramBot) convertToDomainCommand(msg *TelegramMessage) *domain.Command {
-	return &domain.Command{
+	cmd := &domain.Command{
 		ID:   fmt.Sprintf("%d_%d", msg.Chat.ID, msg.MessageID),
 		Text: strings.TrimSpace(msg.Text),
 		User: &domain.User{
@@ -169,7 +177,17 @@ func (b *TelegramBot) convertToDomainCommand(msg *TelegramMessage) *domain.Comma
 			Username: msg.Chat.Username,
 		},
 		Timestamp: time.Unix(msg.Date, 0),
+		// Include file attachments
+		Document:  msg.Document,
+		Photo:     msg.Photo,
 	}
+	
+	// If there's no text but there's a file, set the text to /analyze for automatic processing
+	if cmd.Text == "" && (msg.Document != nil || len(msg.Photo) > 0) {
+		cmd.Text = "/analyze"
+	}
+	
+	return cmd
 }
 
 // sendTelegramMessage sends a message to Telegram

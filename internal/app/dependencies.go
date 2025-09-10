@@ -51,6 +51,10 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	weatherService := services.NewWeatherService(serviceLogger)
 	userService := NewUserService(db, logger)
 	
+	// Create file processing services
+	fileExtractor := services.NewFileExtractor(logger)
+	telegramFileService := services.NewTelegramFileService(os.Getenv("BOT_TOKEN"), logger)
+	
 	// Create DevTaskMaster services
 	taskAnalyzer := services.NewTaskAnalyzer()
 	teamManager := services.NewTeamManager()
@@ -94,7 +98,7 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	metricsCommand := commands.NewMetricsCommand(metricsProvider, logger)
 	
 	// Create DevTaskMaster command handlers
-	analyzeCommand := commands.NewAnalyzeCommand(taskAnalyzer, logger)
+	analyzeCommand := commands.NewAnalyzeCommand(taskAnalyzer, logger, fileExtractor, telegramFileService)
 	projectCommand := commands.NewProjectCommand(db, logger)
 	teamCommand := commands.NewTeamCommand(db, teamManager, logger)
 	workloadCommand := commands.NewWorkloadCommand(db, teamManager, logger)

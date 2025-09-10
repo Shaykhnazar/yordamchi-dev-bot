@@ -12,6 +12,9 @@ type Command struct {
 	User      *User
 	Chat      *Chat
 	Timestamp time.Time
+	// File attachments
+	Document *TelegramDocument `json:"document,omitempty"`
+	Photo    []TelegramPhoto   `json:"photo,omitempty"`
 }
 
 // Response represents a bot response
@@ -52,4 +55,42 @@ type Logger interface {
 	Warn(msg string, args ...interface{})
 	Error(msg string, args ...interface{})
 	With(args ...interface{}) Logger
+}
+
+// Telegram file types for file upload support
+
+// TelegramDocument represents a document file sent via Telegram
+type TelegramDocument struct {
+	FileID       string `json:"file_id"`
+	FileUniqueID string `json:"file_unique_id"`
+	FileName     string `json:"file_name,omitempty"`
+	MimeType     string `json:"mime_type,omitempty"`
+	FileSize     int    `json:"file_size,omitempty"`
+	Thumbnail    *TelegramPhotoSize `json:"thumb,omitempty"`
+}
+
+// TelegramPhoto represents a photo sent via Telegram
+type TelegramPhoto struct {
+	FileID       string `json:"file_id"`
+	FileUniqueID string `json:"file_unique_id"`
+	Width        int    `json:"width"`
+	Height       int    `json:"height"`
+	FileSize     int    `json:"file_size,omitempty"`
+}
+
+// TelegramPhotoSize represents different sizes of photos/thumbnails
+type TelegramPhotoSize struct {
+	FileID       string `json:"file_id"`
+	FileUniqueID string `json:"file_unique_id"`
+	Width        int    `json:"width"`
+	Height       int    `json:"height"`
+	FileSize     int    `json:"file_size,omitempty"`
+}
+
+// TelegramFile represents file info from getFile API
+type TelegramFile struct {
+	FileID       string `json:"file_id"`
+	FileUniqueID string `json:"file_unique_id"`
+	FileSize     int    `json:"file_size,omitempty"`
+	FilePath     string `json:"file_path,omitempty"`
 }
