@@ -47,7 +47,7 @@ func (r *CommandRouter) Route(ctx context.Context, cmd *domain.Command) (*domain
 	if len(parts) == 0 {
 		return &domain.Response{
 			Text:      "❓ Noma'lum buyruq. /help yozing",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 	command := parts[0]
@@ -61,7 +61,7 @@ func (r *CommandRouter) Route(ctx context.Context, cmd *domain.Command) (*domain
 	if handler == nil {
 		return &domain.Response{
 			Text:      "❓ Noma'lum buyruq. /help yozing",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -74,7 +74,7 @@ func (r *CommandRouter) Route(ctx context.Context, cmd *domain.Command) (*domain
 		r.logger.Error("Command execution failed", "command", cmd.Text, "error", err)
 		return &domain.Response{
 			Text:      "❌ Buyruqni bajarishda xatolik yuz berdi",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, err
 	}
 

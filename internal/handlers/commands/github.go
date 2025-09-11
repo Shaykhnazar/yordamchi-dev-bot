@@ -36,6 +36,11 @@ func (h *GitHubCommand) Handle(ctx context.Context, cmd *domain.Command) (*domai
 	command := strings.ToLower(parts[0])
 	
 	switch command {
+	case "/github":
+		return &domain.Response{
+			Text:      h.getUsageMessage(),
+			ParseMode: "Markdown",
+		}, nil
 	case "/repo":
 		return h.handleRepoCommand(ctx, parts[1:])
 	case "/user":
