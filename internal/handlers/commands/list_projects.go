@@ -41,11 +41,17 @@ func (c *ListProjectsCommand) Usage() string {
 func (c *ListProjectsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
 	c.logger.Info("Processing list_projects command", "user_id", cmd.User.TelegramID, "chat_id", cmd.Chat.ID)
 
-	// For MVP, show mock projects data
-	// In production, this would query the database for user's projects
-	mockProjects := c.getMockProjects(cmd.User.TelegramID)
+	// Get real projects from database
+	projects, err := c.db.GetProjectsByChatID(cmd.Chat.ID)
+	if err != nil {
+		c.logger.Error("Failed to get projects", "error", err, "chat_id", cmd.Chat.ID)
+		return &domain.Response{
+			Text: "❌ Failed to retrieve projects. Please try again.",
+			ParseMode: "Markdown",
+		}, nil
+	}
 	
-	if len(mockProjects) == 0 {
+	if len(projects) == 0 {
 		return &domain.Response{
 			Text: "📋 **No Projects Found**\n\n" +
 				"You haven't created any projects yet.\n\n" +
@@ -58,11 +64,11 @@ func (c *ListProjectsCommand) Handle(ctx context.Context, cmd *domain.Command) (
 		}, nil
 	}
 
-	response := c.formatProjectsList(mockProjects)
+	response := c.formatProjectsList(projects)
 	
 	c.logger.Info("Projects listed", 
 		"user_id", cmd.User.TelegramID,
-		"projects_count", len(mockProjects))
+		"projects_count", len(projects))
 	
 	return &domain.Response{
 		Text:      response,
@@ -71,12 +77,12 @@ func (c *ListProjectsCommand) Handle(ctx context.Context, cmd *domain.Command) (
 }
 
 // formatProjectsList formats projects for display
-func (c *ListProjectsCommand) formatProjectsList(projects []domain.Project) string {
+func (c *ListProjectsCommand) formatProjectsList(projects []database.Project) string {
 	response := "📊 **Your Development Projects**\n\n"
 	
-	activeProjects := []domain.Project{}
-	completedProjects := []domain.Project{}
-	pausedProjects := []domain.Project{}
+	activeProjects := []database.Project{}
+	completedProjects := []database.Project{}
+	pausedProjects := []database.Project{}
 	
 	// Group projects by status
 	for _, project := range projects {
@@ -94,7 +100,7 @@ func (c *ListProjectsCommand) formatProjectsList(projects []domain.Project) stri
 	if len(activeProjects) > 0 {
 		response += "🟢 **Active Projects:**\n"
 		for _, project := range activeProjects {
-			progress := c.getMockProgress(project.ID)
+			progress := c.getProjectProgress(project.ID)
 			response += fmt.Sprintf("├── **%s** (`%s`)\n", project.Name, project.ID)
 			response += fmt.Sprintf("│   └── Progress: %s %.0f%% complete\n", getProgressBar(progress), progress*100)
 		}
@@ -168,19 +174,15 @@ func (c *ListProjectsCommand) getMockProjects(userID int64) []domain.Project {
 	}
 }
 
-// Mock progress data
-func (c *ListProjectsCommand) getMockProgress(projectID string) float64 {
-	progressMap := map[string]float64{
-		"proj_123": 0.67, // 67%
-		"proj_124": 0.34, // 34%
-		"proj_125": 0.12, // 12%
-		"proj_126": 1.0,  // 100%
+// Get real project progress from database
+func (c *ListProjectsCommand) getProjectProgress(projectID string) float64 {
+	stats, err := c.db.GetProjectStats(projectID)
+	if err != nil {
+		c.logger.Error("Failed to get project stats", "error", err, "project_id", projectID)
+		return 0.0
 	}
 	
-	if progress, exists := progressMap[projectID]; exists {
-		return progress
-	}
-	return 0.0
+	return stats.Progress
 }
 
 // Helper function to create progress bar

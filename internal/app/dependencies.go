@@ -56,7 +56,7 @@ func NewDependencies(config *handlers.Config, db *database.DB) (*Dependencies, e
 	telegramFileService := services.NewTelegramFileService(os.Getenv("BOT_TOKEN"), logger)
 	
 	// Create DevTaskMaster services
-	taskAnalyzer := services.NewTaskAnalyzer()
+	taskAnalyzer := services.NewTaskAnalyzer(serviceLogger)
 	teamManager := services.NewTeamManager()
 
 	// Create router
@@ -221,4 +221,29 @@ func (a *loggerAdapter) Printf(format string, args ...interface{}) {
 // Println implements services.Logger interface  
 func (a *loggerAdapter) Println(args ...interface{}) {
 	a.logger.Info("%v", args...)
+}
+
+// Debug implements domain.Logger interface
+func (a *loggerAdapter) Debug(msg string, args ...interface{}) {
+	a.logger.Debug(msg, args...)
+}
+
+// Info implements domain.Logger interface
+func (a *loggerAdapter) Info(msg string, args ...interface{}) {
+	a.logger.Info(msg, args...)
+}
+
+// Warn implements domain.Logger interface
+func (a *loggerAdapter) Warn(msg string, args ...interface{}) {
+	a.logger.Warn(msg, args...)
+}
+
+// Error implements domain.Logger interface
+func (a *loggerAdapter) Error(msg string, args ...interface{}) {
+	a.logger.Error(msg, args...)
+}
+
+// With implements domain.Logger interface
+func (a *loggerAdapter) With(args ...interface{}) domain.Logger {
+	return &loggerAdapter{logger: a.logger.With(args...)}
 }

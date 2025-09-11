@@ -65,7 +65,7 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	projectID := generateProjectID()
 	
 	// Create project
-	project := &domain.Project{
+	project := &database.Project{
 		ID:          projectID,
 		Name:        projectName,
 		Description: fmt.Sprintf("Project created via Telegram bot by @%s", cmd.User.Username),
@@ -75,8 +75,16 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		UpdatedAt:   time.Now(),
 	}
 	
-	// In the future, this would save to database
-	// For now, we'll just simulate the creation
+	// Save to database
+	err := c.db.CreateProject(project)
+	if err != nil {
+		c.logger.Error("Failed to create project", "error", err, "project_name", projectName)
+		return &domain.Response{
+			Text: "❌ Project creation failed. Please try again.",
+			ParseMode: "Markdown",
+		}, nil
+	}
+	
 	c.logger.Info("Project created", 
 		"project_id", project.ID,
 		"name", project.Name,

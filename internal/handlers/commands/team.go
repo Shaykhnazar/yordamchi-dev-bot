@@ -88,9 +88,9 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 	memberID := generateMemberID()
 	
 	// Create team member
-	member := &domain.TeamMember{
+	member := &database.TeamMember{
 		ID:       memberID,
-		TeamID:   fmt.Sprintf("chat_%d", cmd.Chat.ID),
+		TeamID:   fmt.Sprintf("team_%d", cmd.Chat.ID),
 		UserID:   0, // Would be set when user interacts
 		Username: username,
 		Skills:   cleanSkills,
@@ -99,7 +99,16 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 		Current:  0.0,
 	}
 	
-	// In the future, this would save to database
+	// Save to database
+	err := c.db.CreateTeamMember(member)
+	if err != nil {
+		c.logger.Error("Failed to create team member", "error", err, "username", username)
+		return &domain.Response{
+			Text: "❌ Failed to add team member. Please try again.",
+			ParseMode: "Markdown",
+		}, nil
+	}
+	
 	c.logger.Info("Team member added", 
 		"member_id", member.ID,
 		"username", username,

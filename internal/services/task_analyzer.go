@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"fmt"
 	"strings"
 	"time"
@@ -9,17 +10,52 @@ import (
 )
 
 type TaskAnalyzer struct {
-	// AI service integration will be added later
-	// For MVP, we'll use rule-based analysis
+	claudeService *ClaudeService
+	geminiService *GeminiService
+	logger        domain.Logger
 }
 
-func NewTaskAnalyzer() *TaskAnalyzer {
-	return &TaskAnalyzer{}
+func NewTaskAnalyzer(logger domain.Logger) *TaskAnalyzer {
+	return &TaskAnalyzer{
+		claudeService: NewClaudeService(logger),
+		geminiService: NewGeminiService(logger),
+		logger:        logger,
+	}
 }
 
 // AnalyzeRequirement breaks down a development requirement into tasks
 func (ta *TaskAnalyzer) AnalyzeRequirement(req domain.TaskBreakdownRequest) (*domain.TaskBreakdownResponse, error) {
-	// MVP implementation - rule-based task breakdown
+	ctx := context.Background()
+	
+	// Try AI services in order of preference, fall back to rule-based analysis
+	
+	// 1. Try Claude first (most accurate for code analysis)
+	if ta.claudeService.IsConfigured() {
+		ta.logger.Info("Using Claude AI for task analysis")
+		result, err := ta.claudeService.AnalyzeRequirement(ctx, req)
+		if err == nil {
+			return result, nil
+		}
+		ta.logger.Error("Claude analysis failed, trying Gemini", "error", err)
+	}
+	
+	// 2. Try Gemini as fallback
+	if ta.geminiService.IsConfigured() {
+		ta.logger.Info("Using Gemini AI for task analysis")
+		result, err := ta.geminiService.AnalyzeRequirement(ctx, req)
+		if err == nil {
+			return result, nil
+		}
+		ta.logger.Error("Gemini analysis failed, using rule-based fallback", "error", err)
+	}
+	
+	// 3. Fall back to rule-based analysis
+	ta.logger.Info("Using rule-based task analysis (no AI configured)")
+	return ta.ruleBasedAnalysis(req)
+}
+
+// ruleBasedAnalysis provides fallback analysis when AI services are unavailable
+func (ta *TaskAnalyzer) ruleBasedAnalysis(req domain.TaskBreakdownRequest) (*domain.TaskBreakdownResponse, error) {
 	tasks := ta.generateTasks(req.Requirement, req.ProjectType)
 	
 	// Calculate estimates based on task complexity
@@ -38,7 +74,7 @@ func (ta *TaskAnalyzer) AnalyzeRequirement(req domain.TaskBreakdownRequest) (*do
 		RecommendedTeam: recommendedTeam,
 		CriticalPath:    ta.identifyCriticalPath(tasks),
 		RiskFactors:     ta.identifyRiskFactors(req.Requirement),
-		Confidence:      0.75, // MVP confidence level
+		Confidence:      0.75, // Rule-based confidence level
 	}, nil
 }
 
