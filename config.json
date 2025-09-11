@@ -6,8 +6,8 @@
         "author": "Golang O'rganish Guruhi"
     },
     "messages": {
-        "welcome": "🤖 Welcome to Yordamchi Dev Bot - AI Assistant!\n\n🎭 **Entertainment:** /hazil, /iqtibos\n🔧 **Utilities:** /ping, /stats, /weather, /github\n🚀 **AI Features:** /analyze, /create_project, /workload\n\nType /help for full command list!",
-        "help": "📚 **Available Commands:**\n\n🎭 **Fun & Quotes:**\n/hazil - Random programming joke\n/iqtibos - Motivational quote\n\n🔧 **Utilities:**\n/ping - Bot status\n/stats - Usage statistics\n/weather city - Weather info\n/github user - GitHub user info\n/metrics - Performance dashboard\n\n🚀 **AI Project Management:**\n/analyze requirement - Break down development tasks\n/create_project name - Create new project\n/add_member @user skills - Add team member\n/workload - Team workload analysis\n/list_projects - Show all projects\n/list_team - Show team members\n\n💡 Use /help command for detailed info!",
+        "welcome": "🤖 Welcome to Yordamchi Dev Bot - AI Assistant!\n\n🎭 Entertainment: /hazil, /iqtibos\n🔧 Utilities: /ping, /stats, /weather, /github\n🚀 AI Features: /analyze, /create_project, /workload\n\nType /help for full command list!",
+        "help": "📚 Available Commands:\n\n🎭 Fun & Quotes:\n/hazil - Random programming joke\n/iqtibos - Motivational quote\n\n🔧 Utilities:\n/ping - Bot status\n/stats - Usage statistics\n/weather city - Weather info\n/github user - GitHub user info\n/metrics - Performance dashboard\n\n🚀 AI Project Management:\n/analyze requirement - Break down development tasks\n/create_project name - Create new project\n/add_member @user skills - Add team member\n/workload - Team workload analysis\n/list_projects - Show all projects\n/list_team - Show team members\n\n💡 Use /help command for detailed info!",
         "unknown_command": "❓ Noma'lum buyruq. /help yozing"
     },
     "jokes": [
