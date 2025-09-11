@@ -46,12 +46,12 @@ func (c *WorkloadCommand) Handle(ctx context.Context, cmd *domain.Command) (*dom
 	c.logger.Info("Processing workload command", "user_id", cmd.User.TelegramID, "chat_id", cmd.Chat.ID)
 
 	teamID := fmt.Sprintf("chat_%d", cmd.Chat.ID)
-	
+
 	// For MVP, we'll show mock data since we don't have database integration yet
 	// In production, this would fetch real data from database
 	mockMembers := c.getMockTeamMembers(teamID)
 	mockTasks := c.getMockTasks()
-	
+
 	if len(mockMembers) == 0 {
 		return &domain.Response{
 			Text: "❌ No team members found for this chat.\n\n" +
@@ -60,53 +60,53 @@ func (c *WorkloadCommand) Handle(ctx context.Context, cmd *domain.Command) (*dom
 				"• Use `/create_project project_name` to create a project\n" +
 				"• Use `/analyze requirement` to generate tasks\n\n" +
 				"**Example:** `/add_member @alice go,react,docker`",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
-	
+
 	// Analyze workload using TeamManager
 	workload := c.teamManager.AnalyzeWorkload(teamID, mockMembers, mockTasks)
-	
+
 	// Format and return results
 	response := c.formatWorkloadAnalysis(workload)
-	
-	c.logger.Info("Workload analysis completed", 
+
+	c.logger.Info("Workload analysis completed",
 		"team_id", teamID,
 		"members_count", len(workload.Members),
 		"total_utilization", workload.Utilization)
-	
+
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 
 // formatWorkloadAnalysis formats workload data for display
 func (c *WorkloadCommand) formatWorkloadAnalysis(workload *domain.TeamWorkload) string {
 	var response strings.Builder
-	
+
 	response.WriteString("📊 **Team Workload Analysis**\n\n")
-	
+
 	// Team overview
 	utilizationEmoji := getUtilizationEmoji(workload.Utilization)
 	response.WriteString(fmt.Sprintf("**Team Overview:**\n"))
 	response.WriteString(fmt.Sprintf("├── Total Capacity: %.1fh/week\n", workload.Available))
 	response.WriteString(fmt.Sprintf("├── Currently Allocated: %.1fh/week\n", workload.Allocated))
 	response.WriteString(fmt.Sprintf("└── %s Team Utilization: %.0f%%\n\n", utilizationEmoji, workload.Utilization*100))
-	
+
 	// Individual member workloads
 	response.WriteString("👥 **Individual Workloads:**\n")
-	
+
 	for _, member := range workload.Members {
 		statusEmoji := getStatusEmoji(member.Status)
 		utilizationBar := getUtilizationBar(member.Utilization)
-		
+
 		response.WriteString(fmt.Sprintf("👤 **@%s**\n", member.Username))
 		response.WriteString(fmt.Sprintf("├── %s Capacity: %.1fh/week\n", utilizationBar, member.Capacity))
 		response.WriteString(fmt.Sprintf("├── Current: %.1fh (%.0f%% utilization)\n", member.Current, member.Utilization*100))
 		response.WriteString(fmt.Sprintf("└── %s Status: %s\n\n", statusEmoji, strings.Title(member.Status)))
 	}
-	
+
 	// Alerts and recommendations
 	alerts := c.generateAlerts(workload)
 	if len(alerts) > 0 {
@@ -116,7 +116,7 @@ func (c *WorkloadCommand) formatWorkloadAnalysis(workload *domain.TeamWorkload) 
 		}
 		response.WriteString("\n")
 	}
-	
+
 	recommendations := c.generateRecommendations(workload)
 	if len(recommendations) > 0 {
 		response.WriteString("💡 **Recommendations:**\n")
@@ -125,7 +125,7 @@ func (c *WorkloadCommand) formatWorkloadAnalysis(workload *domain.TeamWorkload) 
 		}
 		response.WriteString("\n")
 	}
-	
+
 	// Impact analysis
 	response.WriteString("📈 **Optimization Impact:**\n")
 	if workload.Utilization > 0.85 {
@@ -141,7 +141,7 @@ func (c *WorkloadCommand) formatWorkloadAnalysis(workload *domain.TeamWorkload) 
 		response.WriteString("• Good balance of productivity and sustainability\n")
 		response.WriteString("• Continue current pace\n")
 	}
-	
+
 	return response.String()
 }
 
@@ -158,7 +158,7 @@ func (c *WorkloadCommand) getMockTeamMembers(teamID string) []domain.TeamMember 
 			Current:  34.0,
 		},
 		{
-			ID:       "member_2", 
+			ID:       "member_2",
 			TeamID:   teamID,
 			Username: "bob",
 			Skills:   []string{"react", "typescript", "css"},
@@ -188,7 +188,7 @@ func (c *WorkloadCommand) getMockTasks() []domain.Task {
 		},
 		{
 			ID:            "task_2",
-			AssignedTo:    "member_2", 
+			AssignedTo:    "member_2",
 			EstimateHours: 25.0,
 			Status:        "todo",
 		},
@@ -236,23 +236,23 @@ func getUtilizationBar(utilization float64) string {
 
 func (c *WorkloadCommand) generateAlerts(workload *domain.TeamWorkload) []string {
 	alerts := []string{}
-	
+
 	for _, member := range workload.Members {
 		if member.Status == "overloaded" {
 			alerts = append(alerts, fmt.Sprintf("@%s is overloaded (%.0f%% utilization)", member.Username, member.Utilization*100))
 		}
 	}
-	
+
 	if workload.Utilization > 0.85 {
 		alerts = append(alerts, "Team approaching maximum capacity")
 	}
-	
+
 	return alerts
 }
 
 func (c *WorkloadCommand) generateRecommendations(workload *domain.TeamWorkload) []string {
 	recommendations := []string{}
-	
+
 	// Find overloaded and underloaded members
 	var overloaded, underloaded []domain.MemberWorkload
 	for _, member := range workload.Members {
@@ -262,20 +262,20 @@ func (c *WorkloadCommand) generateRecommendations(workload *domain.TeamWorkload)
 			underloaded = append(underloaded, member)
 		}
 	}
-	
+
 	// Generate redistribution recommendations
 	if len(overloaded) > 0 && len(underloaded) > 0 {
-		recommendations = append(recommendations, 
+		recommendations = append(recommendations,
 			fmt.Sprintf("Reassign tasks from @%s to @%s", overloaded[0].Username, underloaded[0].Username))
 	}
-	
+
 	if workload.Utilization < 0.6 {
 		recommendations = append(recommendations, "Team has capacity for additional work")
 	}
-	
+
 	if workload.Utilization > 0.85 {
 		recommendations = append(recommendations, "Consider extending timeline by 0.5-1 days")
 	}
-	
+
 	return recommendations
 }

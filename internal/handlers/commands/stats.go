@@ -36,7 +36,7 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 		h.logger.Error("Failed to get user stats", "error", err)
 		return &domain.Response{
 			Text:      "❌ Statistikani olishda xatolik yuz berdi",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -55,18 +55,18 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 	}
 
 	uptime := time.Since(h.startTime)
-	
+
 	message := fmt.Sprintf(
 		"📊 **Bot Statistikasi**\n\n"+
-		"👥 **Foydalanuvchilar:**\n"+
-		"   • Jami: %d\n"+
-		"   • Bugun yangi: %d\n"+
-		"   • Bugun faol: %d\n\n"+
-		"📈 **Faollik:**\n"+
-		"   • Bugun buyruqlar: %d\n\n"+
-		"⏱️ **Uptime:** %s\n"+
-		"🔄 **Arxitektura:** Clean Architecture\n"+
-		"🚀 **Versiya:** 1.0.0",
+			"👥 **Foydalanuvchilar:**\n"+
+			"   • Jami: %d\n"+
+			"   • Bugun yangi: %d\n"+
+			"   • Bugun faol: %d\n\n"+
+			"📈 **Faollik:**\n"+
+			"   • Bugun buyruqlar: %d\n\n"+
+			"⏱️ **Uptime:** %s\n"+
+			"🔄 **Arxitektura:** Clean Architecture\n"+
+			"🚀 **Versiya:** 1.0.0",
 		totalUsers,
 		dailyStats["new_users_today"],
 		dailyStats["active_users_today"],
@@ -82,13 +82,13 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 		}
 	}
 
-	h.logger.Info("Stats command processed", 
+	h.logger.Info("Stats command processed",
 		"user_id", cmd.User.TelegramID,
 		"total_users", totalUsers)
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

@@ -46,11 +46,11 @@ func (c *ListProjectsCommand) Handle(ctx context.Context, cmd *domain.Command) (
 	if err != nil {
 		c.logger.Error("Failed to get projects", "error", err, "chat_id", cmd.Chat.ID)
 		return &domain.Response{
-			Text: "❌ Failed to retrieve projects. Please try again.",
-			ParseMode: "Markdown",
+			Text:      "❌ Failed to retrieve projects. Please try again.",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
-	
+
 	if len(projects) == 0 {
 		return &domain.Response{
 			Text: "📋 **No Projects Found**\n\n" +
@@ -60,30 +60,30 @@ func (c *ListProjectsCommand) Handle(ctx context.Context, cmd *domain.Command) (
 				"• Use `/analyze requirement` to break down features\n" +
 				"• Use `/add_member @user skills` to build your team\n\n" +
 				"**Example:** `/create_project E-commerce Platform`",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
 	response := c.formatProjectsList(projects)
-	
-	c.logger.Info("Projects listed", 
+
+	c.logger.Info("Projects listed",
 		"user_id", cmd.User.TelegramID,
 		"projects_count", len(projects))
-	
+
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 
 // formatProjectsList formats projects for display
 func (c *ListProjectsCommand) formatProjectsList(projects []database.Project) string {
 	response := "📊 **Your Development Projects**\n\n"
-	
+
 	activeProjects := []database.Project{}
 	completedProjects := []database.Project{}
 	pausedProjects := []database.Project{}
-	
+
 	// Group projects by status
 	for _, project := range projects {
 		switch project.Status {
@@ -95,7 +95,7 @@ func (c *ListProjectsCommand) formatProjectsList(projects []database.Project) st
 			pausedProjects = append(pausedProjects, project)
 		}
 	}
-	
+
 	// Display active projects
 	if len(activeProjects) > 0 {
 		response += "🟢 **Active Projects:**\n"
@@ -106,7 +106,7 @@ func (c *ListProjectsCommand) formatProjectsList(projects []database.Project) st
 		}
 		response += "\n"
 	}
-	
+
 	// Display paused projects
 	if len(pausedProjects) > 0 {
 		response += "🟡 **Paused Projects:**\n"
@@ -116,7 +116,7 @@ func (c *ListProjectsCommand) formatProjectsList(projects []database.Project) st
 		}
 		response += "\n"
 	}
-	
+
 	// Display completed projects
 	if len(completedProjects) > 0 {
 		response += "✅ **Completed Projects:**\n"
@@ -126,7 +126,7 @@ func (c *ListProjectsCommand) formatProjectsList(projects []database.Project) st
 		}
 		response += "\n"
 	}
-	
+
 	// Summary and next steps
 	totalProjects := len(projects)
 	response += fmt.Sprintf("📈 **Summary:** %d total project", totalProjects)
@@ -134,13 +134,13 @@ func (c *ListProjectsCommand) formatProjectsList(projects []database.Project) st
 		response += "s"
 	}
 	response += "\n\n"
-	
+
 	response += "**Available Actions:**\n"
 	response += "• `/analyze requirement` - Break down new features\n"
 	response += "• `/workload` - Check team capacity\n"
 	response += "• `/project_stats <id>` - Detailed project analytics\n"
 	response += "• `/create_project project_name` - Start a new project"
-	
+
 	return response
 }
 
@@ -181,7 +181,7 @@ func (c *ListProjectsCommand) getProjectProgress(projectID string) float64 {
 		c.logger.Error("Failed to get project stats", "error", err, "project_id", projectID)
 		return 0.0
 	}
-	
+
 	return stats.Progress
 }
 
@@ -190,13 +190,13 @@ func getProgressBar(progress float64) string {
 	bars := int(progress * 10)
 	filled := ""
 	empty := ""
-	
+
 	for i := 0; i < bars; i++ {
 		filled += "█"
 	}
 	for i := bars; i < 10; i++ {
 		empty += "░"
 	}
-	
+
 	return filled + empty
 }

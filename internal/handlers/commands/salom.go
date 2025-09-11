@@ -53,20 +53,20 @@ func (h *SalomCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 
 	message := fmt.Sprintf(
 		"%s, %s! 👋\n\n"+
-		"🤖 Men sizning yordamchi botingizman.\n"+
-		"📚 Dasturlashni o'rganishda yordam beraman!\n\n"+
-		"💡 */help buyrug'i bilan nima qila olishimni bilib oling.*",
+			"🤖 Men sizning yordamchi botingizman.\n"+
+			"📚 Dasturlashni o'rganishda yordam beraman!\n\n"+
+			"💡 */help buyrug'i bilan nima qila olishimni bilib oling.*",
 		greeting, name,
 	)
 
-	h.logger.Info("Salom command processed", 
+	h.logger.Info("Salom command processed",
 		"user_id", user.TelegramID,
 		"username", user.Username,
 		"first_name", user.FirstName)
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

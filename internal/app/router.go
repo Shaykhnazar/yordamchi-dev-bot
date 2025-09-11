@@ -47,7 +47,7 @@ func (r *CommandRouter) Route(ctx context.Context, cmd *domain.Command) (*domain
 	if len(parts) == 0 {
 		return &domain.Response{
 			Text:      "❓ Noma'lum buyruq. /help yozing",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 	command := parts[0]
@@ -61,7 +61,7 @@ func (r *CommandRouter) Route(ctx context.Context, cmd *domain.Command) (*domain
 	if handler == nil {
 		return &domain.Response{
 			Text:      "❓ Noma'lum buyruq. /help yozing",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -74,12 +74,12 @@ func (r *CommandRouter) Route(ctx context.Context, cmd *domain.Command) (*domain
 		r.logger.Error("Command execution failed", "command", cmd.Text, "error", err)
 		return &domain.Response{
 			Text:      "❌ Buyruqni bajarishda xatolik yuz berdi",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, err
 	}
 
-	r.logger.Info("Command executed successfully", 
-		"command", cmd.Text, 
+	r.logger.Info("Command executed successfully",
+		"command", cmd.Text,
 		"user", cmd.User.TelegramID,
 		"handler", handler.Description())
 
@@ -107,7 +107,7 @@ func (r *CommandRouter) buildMiddlewareChain(handler domain.HandlerFunc) domain.
 // GetAvailableCommands returns a formatted list of available commands
 func (r *CommandRouter) GetAvailableCommands() string {
 	var commands []string
-	
+
 	for _, handler := range r.handlers {
 		usage := handler.Usage()
 		if usage != "" {

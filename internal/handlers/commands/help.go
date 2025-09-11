@@ -8,17 +8,17 @@ import (
 
 // HelpCommand handles the /help command
 type HelpCommand struct {
-	router domain.Router
-	logger domain.Logger
+	router     domain.Router
+	logger     domain.Logger
 	staticHelp string
 }
 
 // NewHelpCommand creates a new help command handler
 func NewHelpCommand(router domain.Router, staticHelp string, logger domain.Logger) *HelpCommand {
 	return &HelpCommand{
-		router: router,
+		router:     router,
 		staticHelp: staticHelp,
-		logger: logger,
+		logger:     logger,
 	}
 }
 
@@ -27,7 +27,7 @@ func (h *HelpCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 	// Use static help message from config for now
 	// In the future, this could dynamically generate from registered handlers
 	helpMessage := h.staticHelp
-	
+
 	if helpMessage == "" {
 		// Fallback to dynamic help
 		helpMessage = h.generateDynamicHelp()
@@ -37,7 +37,7 @@ func (h *HelpCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 
 	return &domain.Response{
 		Text:      helpMessage,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 
@@ -59,17 +59,17 @@ func (h *HelpCommand) Usage() string {
 // generateDynamicHelp creates help message from registered handlers
 func (h *HelpCommand) generateDynamicHelp() string {
 	handlers := h.router.GetHandlers()
-	
+
 	helpText := "🤖 Mavjud buyruqlar:\n\n"
 	for _, handler := range handlers {
 		if handler.Usage() != "" {
 			helpText += handler.Usage() + "\n"
 		}
 	}
-	
+
 	if len(handlers) == 0 {
 		helpText = "Hech qanday buyruq mavjud emas"
 	}
-	
+
 	return helpText
 }

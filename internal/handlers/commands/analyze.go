@@ -11,18 +11,18 @@ import (
 
 // AnalyzeCommand handles AI-powered task analysis
 type AnalyzeCommand struct {
-	taskAnalyzer       *services.TaskAnalyzer
-	logger             domain.Logger
-	fileExtractor      *services.FileExtractor
+	taskAnalyzer        *services.TaskAnalyzer
+	logger              domain.Logger
+	fileExtractor       *services.FileExtractor
 	telegramFileService *services.TelegramFileService
 }
 
 // NewAnalyzeCommand creates a new analyze command handler
 func NewAnalyzeCommand(taskAnalyzer *services.TaskAnalyzer, logger domain.Logger, fileExtractor *services.FileExtractor, telegramFileService *services.TelegramFileService) *AnalyzeCommand {
 	return &AnalyzeCommand{
-		taskAnalyzer:       taskAnalyzer,
-		logger:             logger,
-		fileExtractor:      fileExtractor,
+		taskAnalyzer:        taskAnalyzer,
+		logger:              logger,
+		fileExtractor:       fileExtractor,
 		telegramFileService: telegramFileService,
 	}
 }
@@ -42,8 +42,8 @@ func (c *AnalyzeCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 
 // handleFileAnalysis processes uploaded files for analysis
 func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
-	c.logger.Info("Processing file analysis", 
-		"user_id", cmd.User.TelegramID, 
+	c.logger.Info("Processing file analysis",
+		"user_id", cmd.User.TelegramID,
 		"filename", cmd.Document.FileName,
 		"file_size", cmd.Document.FileSize)
 
@@ -53,9 +53,9 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 			Text: fmt.Sprintf("❌ **File validation failed:** %s\n\n"+
 				"**Supported formats:** %s\n"+
 				"**Maximum size:** 20MB",
-				err.Error(), 
+				err.Error(),
 				strings.Join(c.fileExtractor.GetSupportedFormats(), ", ")),
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -69,7 +69,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 				"• Reducing file size\n" +
 				"• Converting to a simpler format (TXT, MD)\n" +
 				"• Checking your internet connection",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -89,7 +89,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 				"• Try saving in a different format\n"+
 				"• For PDFs, ensure text is selectable (not scanned image)",
 				err.Error()),
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -103,7 +103,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 				"• Text is embedded in images (OCR not supported yet)\n\n"+
 				"**Suggestion:** Try uploading a plain text file with your requirements.",
 				cmd.Document.FileName),
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -123,7 +123,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 				"• Simplifying the requirements document\n" +
 				"• Using more specific technical language\n" +
 				"• Breaking down into smaller sections",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -140,7 +140,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 
 	return &domain.Response{
 		Text:      responseText,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 
@@ -162,7 +162,7 @@ func (c *AnalyzeCommand) handleTextAnalysis(ctx context.Context, cmd *domain.Com
 				"• Include project scope (backend, frontend, full-stack)\n" +
 				"• Mention integrations (GitHub, Stripe, etc.)\n" +
 				"• Describe user stories and acceptance criteria",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -186,7 +186,7 @@ func (c *AnalyzeCommand) handleTextAnalysis(ctx context.Context, cmd *domain.Com
 				"• Include technology stack details\n" +
 				"• Specify project scope and goals\n" +
 				"• Provide concrete user stories",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -201,65 +201,65 @@ func (c *AnalyzeCommand) handleTextAnalysis(ctx context.Context, cmd *domain.Com
 
 	return &domain.Response{
 		Text:      responseText,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 
 // formatTaskBreakdown formats the analysis results for display
 func (c *AnalyzeCommand) formatTaskBreakdown(result *domain.TaskBreakdownResponse) string {
 	var response strings.Builder
-	
+
 	response.WriteString("📋 **Task Breakdown Analysis**\n\n")
-	
+
 	// Group tasks by category
 	categories := make(map[string][]domain.Task)
 	for _, task := range result.Tasks {
 		categories[task.Category] = append(categories[task.Category], task)
 	}
-	
+
 	// Format each category with appropriate icons
 	categoryIcons := map[string]string{
 		"backend":  "🔐",
-		"frontend": "🎨", 
+		"frontend": "🎨",
 		"qa":       "🧪",
 		"devops":   "⚙️",
 	}
-	
+
 	categoryNames := map[string]string{
 		"backend":  "Backend Development",
-		"frontend": "Frontend Development", 
+		"frontend": "Frontend Development",
 		"qa":       "Quality Assurance",
 		"devops":   "DevOps & Infrastructure",
 	}
-	
+
 	for category, tasks := range categories {
 		icon := categoryIcons[category]
 		if icon == "" {
 			icon = "📝"
 		}
-		
+
 		categoryName := categoryNames[category]
 		if categoryName == "" {
 			categoryName = strings.Title(category) + " Tasks"
 		}
-		
+
 		categoryTotal := 0.0
 		response.WriteString(fmt.Sprintf("%s **%s** (Est: %.1fh)\n", icon, categoryName, getCategoryTotal(tasks)))
-		
+
 		for _, task := range tasks {
 			priorityIcon := getPriorityIcon(task.Priority)
 			response.WriteString(fmt.Sprintf("├── %s %s - %.1fh\n", priorityIcon, task.Title, task.EstimateHours))
 			categoryTotal += task.EstimateHours
 		}
-		
+
 		response.WriteString(fmt.Sprintf("└── **Subtotal: %.1f hours**\n\n", categoryTotal))
 	}
-	
+
 	// Total estimate with developer days calculation
 	devDays := result.TotalEstimate / 8
-	response.WriteString(fmt.Sprintf("⏱️ **Total Estimate: %.1f hours (%.1f developer days)**\n\n", 
+	response.WriteString(fmt.Sprintf("⏱️ **Total Estimate: %.1f hours (%.1f developer days)**\n\n",
 		result.TotalEstimate, devDays))
-	
+
 	// Recommended team
 	if len(result.RecommendedTeam) > 0 {
 		response.WriteString("👥 **Recommended Team:**\n")
@@ -268,13 +268,13 @@ func (c *AnalyzeCommand) formatTaskBreakdown(result *domain.TaskBreakdownRespons
 		}
 		response.WriteString("\n")
 	}
-	
+
 	// Critical path tasks
 	if len(result.CriticalPath) > 0 {
 		response.WriteString("🎯 **Critical Path Tasks:** ")
 		response.WriteString(fmt.Sprintf("%d high-priority items\n\n", len(result.CriticalPath)))
 	}
-	
+
 	// Risk factors
 	if len(result.RiskFactors) > 0 {
 		response.WriteString("⚠️ **Risk Factors & Considerations:**\n")
@@ -283,29 +283,29 @@ func (c *AnalyzeCommand) formatTaskBreakdown(result *domain.TaskBreakdownRespons
 		}
 		response.WriteString("\n")
 	}
-	
+
 	// Analysis confidence and next steps
 	confidenceEmoji := getConfidenceEmoji(result.Confidence)
 	response.WriteString(fmt.Sprintf("📊 **Analysis Confidence:** %s %.0f%%\n\n", confidenceEmoji, result.Confidence*100))
-	
+
 	response.WriteString("**Next Steps:**\n")
 	response.WriteString("• Use `/create_project project_name` to create a project\n")
 	response.WriteString("• Use `/add_member @user skills` to build your team\n")
 	response.WriteString("• Use `/workload` to check team capacity")
-	
+
 	return response.String()
 }
 
 // formatFileAnalysisResults formats analysis results with file context
 func (c *AnalyzeCommand) formatFileAnalysisResults(result *domain.TaskBreakdownResponse, document *domain.TelegramDocument) string {
 	var response strings.Builder
-	
+
 	// File header with metadata
 	response.WriteString("📄 **File Analysis Complete**\n\n")
 	response.WriteString(fmt.Sprintf("**File:** `%s`\n", document.FileName))
 	response.WriteString(fmt.Sprintf("**Size:** %s\n", c.telegramFileService.GetFileSize(document.FileSize)))
 	response.WriteString(fmt.Sprintf("**Type:** %s\n\n", document.MimeType))
-	
+
 	// Analysis summary
 	response.WriteString("🤖 **AI Analysis Summary:**\n")
 	response.WriteString(fmt.Sprintf("├── **Tasks Generated:** %d\n", len(result.Tasks)))
@@ -315,30 +315,30 @@ func (c *AnalyzeCommand) formatFileAnalysisResults(result *domain.TaskBreakdownR
 
 	// Task breakdown by category
 	response.WriteString("📋 **Task Breakdown:**\n\n")
-	
+
 	// Group tasks by category
 	categories := make(map[string][]domain.Task)
 	for _, task := range result.Tasks {
 		categories[task.Category] = append(categories[task.Category], task)
 	}
-	
+
 	categoryIcons := map[string]string{
 		"backend":  "🔐",
-		"frontend": "🎨", 
+		"frontend": "🎨",
 		"qa":       "🧪",
 		"devops":   "⚙️",
 	}
-	
+
 	for category, tasks := range categories {
 		icon := categoryIcons[category]
 		if icon == "" {
 			icon = "📝"
 		}
-		
+
 		categoryName := strings.Title(category)
 		categoryTotal := getCategoryTotal(tasks)
 		response.WriteString(fmt.Sprintf("%s **%s** (%.1fh)\n", icon, categoryName, categoryTotal))
-		
+
 		// Show up to 3 tasks per category to keep response manageable
 		maxTasks := 3
 		for i, task := range tasks {
@@ -346,13 +346,13 @@ func (c *AnalyzeCommand) formatFileAnalysisResults(result *domain.TaskBreakdownR
 				response.WriteString(fmt.Sprintf("├── ... and %d more %s tasks\n", len(tasks)-maxTasks, category))
 				break
 			}
-			
+
 			priority := getPriorityIcon(task.Priority)
 			response.WriteString(fmt.Sprintf("├── %s %s (%.1fh)\n", priority, task.Title, task.EstimateHours))
 		}
 		response.WriteString("\n")
 	}
-	
+
 	// Project insights
 	if len(result.RecommendedTeam) > 0 {
 		response.WriteString("👥 **Recommended Team Skills:**\n")
@@ -361,7 +361,7 @@ func (c *AnalyzeCommand) formatFileAnalysisResults(result *domain.TaskBreakdownR
 		}
 		response.WriteString("\n")
 	}
-	
+
 	// Risk factors (if any)
 	if len(result.RiskFactors) > 0 {
 		response.WriteString("⚠️ **Key Risks:**\n")
@@ -370,14 +370,14 @@ func (c *AnalyzeCommand) formatFileAnalysisResults(result *domain.TaskBreakdownR
 		}
 		response.WriteString("\n")
 	}
-	
+
 	// Next steps
 	response.WriteString("🚀 **Next Steps:**\n")
 	response.WriteString("• Use `/create_project project_name` to create a project\n")
 	response.WriteString("• Use `/add_member @user skills` to build your team\n")
 	response.WriteString("• Use `/workload` to analyze team capacity\n")
 	response.WriteString("• Use `/list_projects` to track progress")
-	
+
 	return response.String()
 }
 
@@ -417,7 +417,7 @@ func getConfidenceEmoji(confidence float64) string {
 	} else if confidence >= 0.75 {
 		return "✅" // High confidence
 	} else if confidence >= 0.6 {
-		return "⚠️"  // Medium confidence
+		return "⚠️" // Medium confidence
 	} else {
 		return "❓" // Low confidence
 	}

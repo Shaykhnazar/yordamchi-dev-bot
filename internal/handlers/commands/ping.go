@@ -25,7 +25,7 @@ func NewPingCommand(logger domain.Logger, startTime time.Time) *PingCommand {
 // Handle processes the ping command
 func (h *PingCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
 	uptime := time.Since(h.startTime)
-	
+
 	response := fmt.Sprintf(`🏓 **Pong!**
 	
 ✅ Bot ishlayapti
@@ -37,13 +37,13 @@ func (h *PingCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 		cmd.User.FirstName,
 		cmd.User.Username)
 
-	h.logger.Info("Ping command processed", 
+	h.logger.Info("Ping command processed",
 		"user_id", cmd.User.TelegramID,
 		"uptime", uptime.String())
 
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

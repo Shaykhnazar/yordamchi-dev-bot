@@ -23,7 +23,7 @@ func NewStartCommand(welcomeMessage string, logger domain.Logger) *StartCommand 
 // Handle processes the start command
 func (h *StartCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
 	user, _ := domain.GetUserFromContext(ctx)
-	
+
 	message := h.welcomeMessage
 	if user != nil && user.FirstName != "" {
 		message += "\n\n👋 Salom, " + user.FirstName + "!"
@@ -34,7 +34,7 @@ func (h *StartCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

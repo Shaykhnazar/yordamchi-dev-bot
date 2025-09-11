@@ -43,11 +43,11 @@ func (c *ListTeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*dom
 	c.logger.Info("Processing list_team command", "user_id", cmd.User.TelegramID, "chat_id", cmd.Chat.ID)
 
 	teamID := fmt.Sprintf("chat_%d", cmd.Chat.ID)
-	
+
 	// For MVP, show mock team data
 	// In production, this would query the database for team members
 	mockMembers := c.getMockTeamMembers(teamID)
-	
+
 	if len(mockMembers) == 0 {
 		return &domain.Response{
 			Text: "👥 **No Team Members Found**\n\n" +
@@ -57,61 +57,61 @@ func (c *ListTeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*dom
 				"• Skills examples: `go,react,docker` or `python,vue,aws`\n" +
 				"• Use `/workload` to analyze team capacity after adding members\n\n" +
 				"**Example:** `/add_member @alice go,postgresql,docker`",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
 	response := c.formatTeamList(mockMembers)
-	
-	c.logger.Info("Team listed", 
+
+	c.logger.Info("Team listed",
 		"chat_id", cmd.Chat.ID,
 		"members_count", len(mockMembers))
-	
+
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 
 // formatTeamList formats team members for display
 func (c *ListTeamCommand) formatTeamList(members []domain.TeamMember) string {
 	response := "👥 **Team Members & Workload**\n\n"
-	
+
 	totalCapacity := 0.0
 	totalCurrent := 0.0
-	
+
 	for _, member := range members {
 		utilization := 0.0
 		if member.Capacity > 0 {
 			utilization = member.Current / member.Capacity
 		}
-		
+
 		statusEmoji := getTeamStatusEmoji(utilization)
 		roleEmoji := getRoleEmoji(member.Role)
 		utilizationBar := getTeamUtilizationBar(utilization)
-		
+
 		response += fmt.Sprintf("%s **@%s** (%s)\n", roleEmoji, member.Username, strings.Title(member.Role))
 		response += fmt.Sprintf("├── 🛠️ Skills: %s\n", strings.Join(member.Skills, ", "))
 		response += fmt.Sprintf("├── %s Capacity: %.0fh/week\n", utilizationBar, member.Capacity)
 		response += fmt.Sprintf("├── Current: %.0fh (%.0f%% utilization) %s\n", member.Current, utilization*100, statusEmoji)
 		response += fmt.Sprintf("└── Status: %s\n\n", getStatusText(utilization))
-		
+
 		totalCapacity += member.Capacity
 		totalCurrent += member.Current
 	}
-	
+
 	// Team summary
 	teamUtilization := 0.0
 	if totalCapacity > 0 {
 		teamUtilization = totalCurrent / totalCapacity
 	}
-	
+
 	teamStatusEmoji := getTeamStatusEmoji(teamUtilization)
 	response += fmt.Sprintf("📊 **Team Summary:**\n")
 	response += fmt.Sprintf("├── Total Capacity: %.0fh/week\n", totalCapacity)
 	response += fmt.Sprintf("├── Current Workload: %.0fh/week\n", totalCurrent)
 	response += fmt.Sprintf("└── %s Team Utilization: %.0f%%", teamStatusEmoji, teamUtilization*100)
-	
+
 	// Add utilization guidance
 	if teamUtilization > 0.85 {
 		response += " (Near capacity ⚠️)"
@@ -120,15 +120,15 @@ func (c *ListTeamCommand) formatTeamList(members []domain.TeamMember) string {
 	} else {
 		response += " (Optimal range ✅)"
 	}
-	
+
 	response += "\n\n"
-	
+
 	// Recommendations
 	response += "**Team Management:**\n"
 	response += "• `/workload` - Detailed workload analysis\n"
 	response += "• `/add_member @user skills` - Add more team members\n"
 	response += "• `/analyze requirement` - Get smart task assignments\n"
-	
+
 	// Capacity recommendations
 	if teamUtilization > 0.85 {
 		response += "\n💡 **Recommendation:** Team is near capacity. Consider:\n"
@@ -141,7 +141,7 @@ func (c *ListTeamCommand) formatTeamList(members []domain.TeamMember) string {
 		response += "• Accelerating current projects\n"
 		response += "• Training and skill development"
 	}
-	
+
 	return response
 }
 
@@ -220,7 +220,7 @@ func getTeamUtilizationBar(utilization float64) string {
 	if bars > 10 {
 		bars = 10
 	}
-	
+
 	filled := strings.Repeat("█", bars)
 	empty := strings.Repeat("░", 10-bars)
 	return filled + empty

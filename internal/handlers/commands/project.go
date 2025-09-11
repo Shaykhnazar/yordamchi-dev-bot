@@ -46,7 +46,7 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	// Extract project name from command text (skip the command itself)
 	cmdText := strings.TrimPrefix(cmd.Text, "/create_project")
 	cmdText = strings.TrimSpace(cmdText)
-	
+
 	if cmdText == "" {
 		return &domain.Response{
 			Text: "❌ Please provide a project name.\n\n" +
@@ -55,15 +55,15 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 				"• Use descriptive names (E-commerce Platform, Mobile App, etc.)\n" +
 				"• Keep it concise but clear\n" +
 				"• Avoid special characters",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
 	projectName := cmdText
-	
+
 	// Generate project ID
 	projectID := generateProjectID()
-	
+
 	// Create project
 	project := &database.Project{
 		ID:          projectID,
@@ -74,22 +74,22 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
 	}
-	
+
 	// Save to database
 	err := c.db.CreateProject(project)
 	if err != nil {
 		c.logger.Error("Failed to create project", "error", err, "project_name", projectName)
 		return &domain.Response{
-			Text: "❌ Project creation failed. Please try again.",
-			ParseMode: "Markdown",
+			Text:      "❌ Project creation failed. Please try again.",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
-	
-	c.logger.Info("Project created", 
+
+	c.logger.Info("Project created",
 		"project_id", project.ID,
 		"name", project.Name,
 		"created_by", cmd.User.TelegramID)
-	
+
 	response := fmt.Sprintf("✅ **Project Created Successfully!**\n\n"+
 		"📝 **Name:** %s\n"+
 		"🆔 **Project ID:** `%s`\n"+
@@ -100,15 +100,15 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		"• Use `/analyze requirement` to break down features\n"+
 		"• Use `/add_member @user skills` to build your team\n"+
 		"• Use `/list_projects` to see all your projects",
-		projectName, 
-		project.ID, 
+		projectName,
+		project.ID,
 		cmd.User.Username,
 		project.CreatedAt.Format("Jan 2, 2006 15:04"),
 		strings.Title(project.Status))
-	
+
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

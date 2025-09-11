@@ -24,27 +24,27 @@ func NewVaqtCommand(logger domain.Logger) *VaqtCommand {
 // Handle processes the /vaqt command
 func (h *VaqtCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
 	now := time.Now()
-	
+
 	// Format time in a user-friendly way
 	timeInfo := fmt.Sprintf(
 		"🕐 **Hozirgi vaqt:**\n\n"+
-		"📅 **Sana:** %s\n"+
-		"⏰ **Vaqt:** %s\n"+
-		"🌍 **UTC:** %s\n"+
-		"📊 **Unix timestamp:** %d",
+			"📅 **Sana:** %s\n"+
+			"⏰ **Vaqt:** %s\n"+
+			"🌍 **UTC:** %s\n"+
+			"📊 **Unix timestamp:** %d",
 		now.Format("2006-01-02"),
 		now.Format("15:04:05"),
 		now.UTC().Format("2006-01-02 15:04:05"),
 		now.Unix(),
 	)
 
-	h.logger.Info("Vaqt command processed", 
+	h.logger.Info("Vaqt command processed",
 		"user_id", cmd.User.TelegramID,
 		"timestamp", now.Unix())
 
 	return &domain.Response{
 		Text:      timeInfo,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

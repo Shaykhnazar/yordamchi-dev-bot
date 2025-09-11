@@ -30,19 +30,19 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	if len(parts) < 2 {
 		return &domain.Response{
 			Text:      "🌤️ Shahar nomini kiriting!\n\nMisol: `/weather Tashkent`",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
 	city := strings.Join(parts[1:], " ")
-	
+
 	// Get weather information
 	weather, err := h.weatherService.GetWeather(ctx, city)
 	if err != nil {
 		h.logger.Error("Failed to get weather", "city", city, "error", err)
 		return &domain.Response{
 			Text:      fmt.Sprintf("❌ %s shahri uchun ob-havo ma'lumotini olishda xatolik", city),
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -53,11 +53,11 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		// English response
 		message = fmt.Sprintf(
 			"🌤️ **Weather in %s**\n\n"+
-			"🌡️ **Temperature:** %.1f°C\n"+
-			"💧 **Humidity:** %d%%\n"+
-			"💨 **Wind:** %.1f km/h\n"+
-			"📊 **Pressure:** %d hPa\n"+
-			"☁️ **Condition:** %s",
+				"🌡️ **Temperature:** %.1f°C\n"+
+				"💧 **Humidity:** %d%%\n"+
+				"💨 **Wind:** %.1f km/h\n"+
+				"📊 **Pressure:** %d hPa\n"+
+				"☁️ **Condition:** %s",
 			weather.Location,
 			weather.Temperature,
 			weather.Humidity,
@@ -67,14 +67,14 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		)
 	}
 
-	h.logger.Info("Weather command processed", 
+	h.logger.Info("Weather command processed",
 		"user_id", cmd.User.TelegramID,
 		"city", city,
 		"command", command)
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

@@ -28,7 +28,7 @@ func (h *IqtibosCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	if len(h.quotes) == 0 {
 		return &domain.Response{
 			Text:      "💭 Hech qanday iqtibos topilmadi!",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -36,13 +36,13 @@ func (h *IqtibosCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	rand.Seed(time.Now().UnixNano())
 	randomQuote := h.quotes[rand.Intn(len(h.quotes))]
 
-	h.logger.Info("Iqtibos command processed", 
+	h.logger.Info("Iqtibos command processed",
 		"user_id", cmd.User.TelegramID,
 		"quote_length", len(randomQuote))
 
 	return &domain.Response{
 		Text:      randomQuote,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

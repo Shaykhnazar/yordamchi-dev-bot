@@ -60,14 +60,14 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 				"• Frontend: `react,vue,angular,javascript,typescript`\n" +
 				"• DevOps: `docker,kubernetes,aws,terraform`\n" +
 				"• QA: `testing,automation,selenium,cypress`",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
 	username := strings.TrimPrefix(args[0], "@")
 	skillsStr := strings.Join(args[1:], "")
 	skills := strings.Split(skillsStr, ",")
-	
+
 	// Clean up skills (trim whitespace and convert to lowercase)
 	cleanSkills := make([]string, 0, len(skills))
 	for _, skill := range skills {
@@ -80,13 +80,13 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 	if len(cleanSkills) == 0 {
 		return &domain.Response{
 			Text:      "❌ Please provide at least one skill.",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
 	// Generate member ID
 	memberID := generateMemberID()
-	
+
 	// Create team member
 	member := &database.TeamMember{
 		ID:       memberID,
@@ -94,27 +94,27 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 		UserID:   0, // Would be set when user interacts
 		Username: username,
 		Skills:   cleanSkills,
-		Capacity: 40.0, // Default 40h/week
+		Capacity: 40.0,        // Default 40h/week
 		Role:     "developer", // Default role
 		Current:  0.0,
 	}
-	
+
 	// Save to database
 	err := c.db.CreateTeamMember(member)
 	if err != nil {
 		c.logger.Error("Failed to create team member", "error", err, "username", username)
 		return &domain.Response{
-			Text: "❌ Failed to add team member. Please try again.",
-			ParseMode: "Markdown",
+			Text:      "❌ Failed to add team member. Please try again.",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
-	
-	c.logger.Info("Team member added", 
+
+	c.logger.Info("Team member added",
 		"member_id", member.ID,
 		"username", username,
 		"skills", cleanSkills,
 		"team_id", member.TeamID)
-	
+
 	response := fmt.Sprintf("✅ **Team Member Added Successfully!**\n\n"+
 		"👤 **Username:** @%s\n"+
 		"🛠️ **Skills:** %s\n"+
@@ -125,15 +125,15 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 		"• Use `/list_team` to see all team members\n"+
 		"• Use `/workload` to analyze team capacity\n"+
 		"• Use `/analyze requirement` for smart task assignment",
-		username, 
-		strings.Join(cleanSkills, ", "), 
+		username,
+		strings.Join(cleanSkills, ", "),
 		member.Capacity,
 		member.Role,
 		member.ID)
-	
+
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

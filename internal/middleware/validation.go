@@ -67,14 +67,14 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 	return func(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
 		// Basic length validation
 		if len(cmd.Text) > m.maxLength {
-			m.logger.Warn("Command too long", 
+			m.logger.Warn("Command too long",
 				"user_id", cmd.User.TelegramID,
 				"command_length", len(cmd.Text),
 				"max_length", m.maxLength)
 
 			return &domain.Response{
 				Text:      fmt.Sprintf("❌ Buyruq juda uzun. Maksimal uzunlik: %d belgi", m.maxLength),
-				ParseMode: "Markdown",
+				ParseMode: "MarkdownV2",
 			}, nil
 		}
 
@@ -110,7 +110,7 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 					validator.Description,
 					validator.Usage,
 				),
-				ParseMode: "Markdown",
+				ParseMode: "MarkdownV2",
 			}, nil
 		}
 
@@ -127,7 +127,7 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 					validator.Description,
 					validator.Usage,
 				),
-				ParseMode: "Markdown",
+				ParseMode: "MarkdownV2",
 			}, nil
 		}
 
@@ -145,7 +145,7 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 					validator.Usage,
 					m.getExampleUsage(baseCommand),
 				),
-				ParseMode: "Markdown",
+				ParseMode: "MarkdownV2",
 			}, nil
 		}
 
@@ -161,15 +161,15 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 func (m *ValidationMiddleware) sanitizeInput(input string) string {
 	// Remove excessive whitespace
 	input = regexp.MustCompile(`\s+`).ReplaceAllString(input, " ")
-	
+
 	// Trim whitespace
 	input = strings.TrimSpace(input)
-	
+
 	// Remove potentially dangerous characters (basic XSS prevention)
 	input = strings.ReplaceAll(input, "<script>", "")
 	input = strings.ReplaceAll(input, "</script>", "")
 	input = strings.ReplaceAll(input, "javascript:", "")
-	
+
 	return input
 }
 

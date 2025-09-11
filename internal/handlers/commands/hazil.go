@@ -28,7 +28,7 @@ func (h *HazilCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 	if len(h.jokes) == 0 {
 		return &domain.Response{
 			Text:      "😅 Hech qanday hazil topilmadi!",
-			ParseMode: "Markdown",
+			ParseMode: "MarkdownV2",
 		}, nil
 	}
 
@@ -36,13 +36,13 @@ func (h *HazilCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 	rand.Seed(time.Now().UnixNano())
 	randomJoke := h.jokes[rand.Intn(len(h.jokes))]
 
-	h.logger.Info("Hazil command processed", 
+	h.logger.Info("Hazil command processed",
 		"user_id", cmd.User.TelegramID,
 		"joke_length", len(randomJoke))
 
 	return &domain.Response{
 		Text:      randomJoke,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 

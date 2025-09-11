@@ -33,18 +33,18 @@ func NewMetricsCommand(metricsProvider MetricsProvider, logger domain.Logger) *M
 func (h *MetricsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
 	// Get performance metrics
 	metrics := h.metricsProvider.GetMetrics()
-	
+
 	// Get cache metrics
 	cacheStats := h.metricsProvider.GetCacheStats()
 
 	message := h.formatMetricsMessage(metrics, cacheStats)
 
-	h.logger.Info("Metrics command processed", 
+	h.logger.Info("Metrics command processed",
 		"user_id", cmd.User.TelegramID)
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}, nil
 }
 
@@ -112,10 +112,10 @@ func (h *MetricsCommand) formatMetricsMessage(metrics, cacheStats map[string]int
 	if cmdMetrics, ok := metrics["command_metrics"].(map[string]interface{}); ok {
 		avgDuration := h.calculateAverageResponseTime(cmdMetrics)
 		message.WriteString(fmt.Sprintf("   • Avg Response: %dms\n", avgDuration))
-		
+
 		slowestCommand := h.findSlowestCommand(cmdMetrics)
 		if slowestCommand.Command != "" {
-			message.WriteString(fmt.Sprintf("   • Slowest: %s (%dms)\n", 
+			message.WriteString(fmt.Sprintf("   • Slowest: %s (%dms)\n",
 				slowestCommand.Command, slowestCommand.Duration))
 		}
 	}
