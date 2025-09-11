@@ -97,20 +97,20 @@ func (g *GitHubService) FormatRepository(repo *GitHubRepository) string {
 		language = "Aniqlanmagan"
 	}
 	
-	return fmt.Sprintf(`📦 <b>%s</b>
+	return fmt.Sprintf(`📦 **%s**
 
-📝 <b>Tavsif:</b> %s
-⭐ <b>Yulduzlar:</b> %d
-🍴 <b>Forklar:</b> %d
-💻 <b>Til:</b> %s
-🔧 <b>Asosiy branch:</b> %s
-🐛 <b>Ochiq muammolar:</b> %d
+📝 **Tavsif:** %s
+⭐ **Yulduzlar:** %d
+🍴 **Forklar:** %d
+💻 **Til:** %s
+🔧 **Asosiy branch:** %s
+🐛 **Ochiq muammolar:** %d
 
-👤 <b>Egasi:</b> %s
-🔗 <b>Havola:</b> <a href="%s">%s</a>
+👤 **Egasi:** %s
+🔗 **Havola:** [%s](%s)
 
-📅 <b>Yaratilgan:</b> %s
-🔄 <b>Yangilangan:</b> %s`,
+📅 **Yaratilgan:** %s
+🔄 **Yangilangan:** %s`,
 		repo.FullName,
 		description,
 		repo.Stars,
@@ -147,17 +147,17 @@ func (g *GitHubService) FormatUser(user *GitHubUser) string {
 		location = "Ko'rsatilmagan"
 	}
 	
-	return fmt.Sprintf(`👤 <b>%s</b> (@%s)
+	return fmt.Sprintf(`👤 **%s** (@%s)
 
-📝 <b>Bio:</b> %s
-🏢 <b>Kompaniya:</b> %s
-📍 <b>Joylashuv:</b> %s
-📦 <b>Ochiq repozitoriyalar:</b> %d
-👥 <b>Obunachilar:</b> %d
-➡️ <b>Obunalar:</b> %d
+📝 **Bio:** %s
+🏢 **Kompaniya:** %s
+📍 **Joylashuv:** %s
+📦 **Ochiq repozitoriyalar:** %d
+👥 **Obunachilar:** %d
+➡️ **Obunalar:** %d
 
-🔗 <b>Profil:</b> <a href="%s">%s</a>
-📅 <b>Ro'yxatdan o'tgan:</b> %s`,
+🔗 **Profil:** [%s](%s)
+📅 **Ro'yxatdan o'tgan:** %s`,
 		name,
 		user.Login,
 		bio,

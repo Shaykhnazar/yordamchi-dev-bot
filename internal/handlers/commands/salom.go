@@ -55,7 +55,7 @@ func (h *SalomCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 		"%s, %s! 👋\n\n"+
 		"🤖 Men sizning yordamchi botingizman.\n"+
 		"📚 Dasturlashni o'rganishda yordam beraman!\n\n"+
-		"💡 <i>/help buyrug'i bilan nima qila olishimni bilib oling.</i>",
+		"💡 */help buyrug'i bilan nima qila olishimni bilib oling.*",
 		greeting, name,
 	)
 
@@ -66,7 +66,7 @@ func (h *SalomCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 

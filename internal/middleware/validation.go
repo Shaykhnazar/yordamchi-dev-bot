@@ -35,7 +35,7 @@ func NewValidationMiddleware(logger domain.Logger) *ValidationMiddleware {
 		MinArgs:     2,
 		MaxArgs:     5,
 		Description: "Weather command requires a city name",
-		Usage:       "/weather &lt;city_name&gt;",
+		Usage:       "/weather city_name",
 	}
 
 	// GitHub command validation
@@ -44,7 +44,7 @@ func NewValidationMiddleware(logger domain.Logger) *ValidationMiddleware {
 		MinArgs:     2,
 		MaxArgs:     2,
 		Description: "Repository command requires owner/repo format",
-		Usage:       "/repo &lt;owner/repository&gt;",
+		Usage:       "/repo owner/repository",
 	}
 
 	validators["/user"] = &CommandValidator{
@@ -52,7 +52,7 @@ func NewValidationMiddleware(logger domain.Logger) *ValidationMiddleware {
 		MinArgs:     2,
 		MaxArgs:     2,
 		Description: "User command requires a GitHub username",
-		Usage:       "/user &lt;username&gt;",
+		Usage:       "/user username",
 	}
 
 	return &ValidationMiddleware{
@@ -74,7 +74,7 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 
 			return &domain.Response{
 				Text:      fmt.Sprintf("❌ Buyruq juda uzun. Maksimal uzunlik: %d belgi", m.maxLength),
-				ParseMode: "HTML",
+				ParseMode: "Markdown",
 			}, nil
 		}
 
@@ -106,11 +106,11 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 
 			return &domain.Response{
 				Text: fmt.Sprintf(
-					"❌ %s\n\n💡 <b>To'g'ri format:</b>\n<code>%s</code>",
+					"❌ %s\n\n💡 **To'g'ri format:**\n`%s`",
 					validator.Description,
 					validator.Usage,
 				),
-				ParseMode: "HTML",
+				ParseMode: "Markdown",
 			}, nil
 		}
 
@@ -123,11 +123,11 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 
 			return &domain.Response{
 				Text: fmt.Sprintf(
-					"❌ %s\n\n💡 <b>To'g'ri format:</b>\n<code>%s</code>",
+					"❌ %s\n\n💡 **To'g'ri format:**\n`%s`",
 					validator.Description,
 					validator.Usage,
 				),
-				ParseMode: "HTML",
+				ParseMode: "Markdown",
 			}, nil
 		}
 
@@ -140,12 +140,12 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 
 			return &domain.Response{
 				Text: fmt.Sprintf(
-					"❌ %s\n\n💡 <b>To'g'ri format:</b>\n<code>%s</code>\n\n📝 <b>Misol:</b>\n<code>%s</code>",
+					"❌ %s\n\n💡 **To'g'ri format:**\n`%s`\n\n📝 **Misol:**\n`%s`",
 					validator.Description,
 					validator.Usage,
 					m.getExampleUsage(baseCommand),
 				),
-				ParseMode: "HTML",
+				ParseMode: "Markdown",
 			}, nil
 		}
 
@@ -185,5 +185,5 @@ func (m *ValidationMiddleware) getExampleUsage(command string) string {
 		return example
 	}
 
-	return command + " <parametr>"
+	return command + " parametr"
 }

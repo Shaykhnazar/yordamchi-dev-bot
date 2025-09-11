@@ -27,11 +27,11 @@ func (h *VaqtCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 	
 	// Format time in a user-friendly way
 	timeInfo := fmt.Sprintf(
-		"🕐 <b>Hozirgi vaqt:</b>\n\n"+
-		"📅 <b>Sana:</b> %s\n"+
-		"⏰ <b>Vaqt:</b> %s\n"+
-		"🌍 <b>UTC:</b> %s\n"+
-		"📊 <b>Unix timestamp:</b> %d",
+		"🕐 **Hozirgi vaqt:**\n\n"+
+		"📅 **Sana:** %s\n"+
+		"⏰ **Vaqt:** %s\n"+
+		"🌍 **UTC:** %s\n"+
+		"📊 **Unix timestamp:** %d",
 		now.Format("2006-01-02"),
 		now.Format("15:04:05"),
 		now.UTC().Format("2006-01-02 15:04:05"),
@@ -44,7 +44,7 @@ func (h *VaqtCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 
 	return &domain.Response{
 		Text:      timeInfo,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 

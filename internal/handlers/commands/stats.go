@@ -36,7 +36,7 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 		h.logger.Error("Failed to get user stats", "error", err)
 		return &domain.Response{
 			Text:      "❌ Statistikani olishda xatolik yuz berdi",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -57,16 +57,16 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 	uptime := time.Since(h.startTime)
 	
 	message := fmt.Sprintf(
-		"📊 <b>Bot Statistikasi</b>\n\n"+
-		"👥 <b>Foydalanuvchilar:</b>\n"+
+		"📊 **Bot Statistikasi**\n\n"+
+		"👥 **Foydalanuvchilar:**\n"+
 		"   • Jami: %d\n"+
 		"   • Bugun yangi: %d\n"+
 		"   • Bugun faol: %d\n\n"+
-		"📈 <b>Faollik:</b>\n"+
+		"📈 **Faollik:**\n"+
 		"   • Bugun buyruqlar: %d\n\n"+
-		"⏱️ <b>Uptime:</b> %s\n"+
-		"🔄 <b>Arxitektura:</b> Clean Architecture\n"+
-		"🚀 <b>Versiya:</b> 1.0.0",
+		"⏱️ **Uptime:** %s\n"+
+		"🔄 **Arxitektura:** Clean Architecture\n"+
+		"🚀 **Versiya:** 1.0.0",
 		totalUsers,
 		dailyStats["new_users_today"],
 		dailyStats["active_users_today"],
@@ -76,7 +76,7 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 
 	// Add popular commands if available
 	if len(popularCommands) > 0 {
-		message += "\n\n🔥 <b>Populyar buyruqlar:</b>\n"
+		message += "\n\n🔥 **Populyar buyruqlar:**\n"
 		for cmd, count := range popularCommands {
 			message += fmt.Sprintf("   • %s: %d\n", cmd, count)
 		}
@@ -88,7 +88,7 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 

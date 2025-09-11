@@ -26,7 +26,7 @@ func NewPingCommand(logger domain.Logger, startTime time.Time) *PingCommand {
 func (h *PingCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
 	uptime := time.Since(h.startTime)
 	
-	response := fmt.Sprintf(`🏓 <b>Pong!</b>
+	response := fmt.Sprintf(`🏓 **Pong!**
 	
 ✅ Bot ishlayapti
 ⏱ Uptime: %s
@@ -43,7 +43,7 @@ func (h *PingCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 

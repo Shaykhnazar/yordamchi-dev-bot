@@ -29,7 +29,7 @@ func (h *GitHubCommand) Handle(ctx context.Context, cmd *domain.Command) (*domai
 	if len(parts) < 2 {
 		return &domain.Response{
 			Text:      h.getUsageMessage(),
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -43,7 +43,7 @@ func (h *GitHubCommand) Handle(ctx context.Context, cmd *domain.Command) (*domai
 	default:
 		return &domain.Response{
 			Text:      "❌ Noma'lum GitHub buyruq",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 }
@@ -61,7 +61,7 @@ func (h *GitHubCommand) Description() string {
 
 // Usage returns the command usage instructions
 func (h *GitHubCommand) Usage() string {
-	return "/repo &lt;owner/name&gt; - Repository ma'lumoti\n/user &lt;username&gt; - Foydalanuvchi profili"
+	return "/repo owner/name - Repository ma'lumoti\n/user username - Foydalanuvchi profili"
 }
 
 // handleRepoCommand handles repository lookup
@@ -69,7 +69,7 @@ func (h *GitHubCommand) handleRepoCommand(ctx context.Context, args []string) (*
 	if len(args) != 1 {
 		return &domain.Response{
 			Text:      "❌ Format: /repo owner/repository\nMisol: /repo torvalds/linux",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -77,7 +77,7 @@ func (h *GitHubCommand) handleRepoCommand(ctx context.Context, args []string) (*
 	if len(repoParts) != 2 {
 		return &domain.Response{
 			Text:      "❌ Format: /repo owner/repository\nMisol: /repo torvalds/linux",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -92,14 +92,14 @@ func (h *GitHubCommand) handleRepoCommand(ctx context.Context, args []string) (*
 		h.logger.Error("GitHub repository error", "error", err, "owner", owner, "repo", repo)
 		return &domain.Response{
 			Text:      "❌ Repository topilmadi yoki xatolik yuz berdi",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
 	message := h.githubService.FormatRepository(repository)
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 
@@ -108,7 +108,7 @@ func (h *GitHubCommand) handleUserCommand(ctx context.Context, args []string) (*
 	if len(args) != 1 {
 		return &domain.Response{
 			Text:      "❌ Format: /user username\nMisol: /user torvalds",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -122,26 +122,24 @@ func (h *GitHubCommand) handleUserCommand(ctx context.Context, args []string) (*
 		h.logger.Error("GitHub user error", "error", err, "username", username)
 		return &domain.Response{
 			Text:      "❌ Foydalanuvchi topilmadi yoki xatolik yuz berdi",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
 	message := h.githubService.FormatUser(user)
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 
 // getUsageMessage returns usage instructions
 func (h *GitHubCommand) getUsageMessage() string {
-	return `🐙 <b>GitHub Commands</b>
-
-<b>Repository ma'lumoti:</b>
-<code>/repo owner/repository</code>
-Misol: <code>/repo microsoft/vscode</code>
-
-<b>Foydalanuvchi profili:</b>
-<code>/user username</code>
-Misol: <code>/user torvalds</code>`
+	return "🐙 **GitHub Commands**\n\n" +
+		"**Repository ma'lumoti:**\n" +
+		"`/repo owner/repository`\n" +
+		"Misol: `/repo microsoft/vscode`\n\n" +
+		"**Foydalanuvchi profili:**\n" +
+		"`/user username`\n" +
+		"Misol: `/user torvalds`"
 }

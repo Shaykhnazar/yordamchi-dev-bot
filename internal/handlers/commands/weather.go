@@ -29,8 +29,8 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	parts := strings.Fields(cmd.Text)
 	if len(parts) < 2 {
 		return &domain.Response{
-			Text:      "🌤️ Shahar nomini kiriting!\n\nMisol: <code>/weather Tashkent</code>",
-			ParseMode: "HTML",
+			Text:      "🌤️ Shahar nomini kiriting!\n\nMisol: `/weather Tashkent`",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -42,7 +42,7 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		h.logger.Error("Failed to get weather", "city", city, "error", err)
 		return &domain.Response{
 			Text:      fmt.Sprintf("❌ %s shahri uchun ob-havo ma'lumotini olishda xatolik", city),
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -52,12 +52,12 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	if command == "/weather" {
 		// English response
 		message = fmt.Sprintf(
-			"🌤️ <b>Weather in %s</b>\n\n"+
-			"🌡️ <b>Temperature:</b> %.1f°C\n"+
-			"💧 <b>Humidity:</b> %d%%\n"+
-			"💨 <b>Wind:</b> %.1f km/h\n"+
-			"📊 <b>Pressure:</b> %d hPa\n"+
-			"☁️ <b>Condition:</b> %s",
+			"🌤️ **Weather in %s**\n\n"+
+			"🌡️ **Temperature:** %.1f°C\n"+
+			"💧 **Humidity:** %d%%\n"+
+			"💨 **Wind:** %.1f km/h\n"+
+			"📊 **Pressure:** %d hPa\n"+
+			"☁️ **Condition:** %s",
 			weather.Location,
 			weather.Temperature,
 			weather.Humidity,
@@ -74,7 +74,7 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 
@@ -91,5 +91,5 @@ func (h *WeatherCommand) Description() string {
 
 // Usage returns the command usage
 func (h *WeatherCommand) Usage() string {
-	return "/weather &lt;city&gt; - Ob-havo ma'lumoti"
+	return "/weather city - Ob-havo ma'lumoti"
 }

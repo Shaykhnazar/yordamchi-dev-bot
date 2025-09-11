@@ -37,7 +37,7 @@ func (h *HelpCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 
 	return &domain.Response{
 		Text:      helpMessage,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 

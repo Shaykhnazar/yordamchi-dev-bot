@@ -26,14 +26,14 @@ func NewHaqidaCommand(config *handlers.Config, logger domain.Logger) *HaqidaComm
 // Handle processes the /haqida command
 func (h *HaqidaCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.Response, error) {
 	botInfo := fmt.Sprintf(
-		"🤖 <b>%s</b>\n\n"+
-		"📊 <b>Versiya:</b> %s\n"+
-		"📝 <b>Tavsif:</b> %s\n"+
-		"👨‍💻 <b>Yaratuvchi:</b> %s\n\n"+
-		"🏗️ <b>Arxitektura:</b> Clean Architecture\n"+
-		"🚀 <b>Til:</b> Go (Golang)\n"+
-		"📦 <b>Ma'lumotlar bazasi:</b> SQLite/PostgreSQL\n\n"+
-		"💡 <i>/help buyrug'i bilan barcha imkoniyatlarni ko'ring!</i>",
+		"🤖 **%s**\n\n"+
+		"📊 **Versiya:** %s\n"+
+		"📝 **Tavsif:** %s\n"+
+		"👨‍💻 **Yaratuvchi:** %s\n\n"+
+		"🏗️ **Arxitektura:** Clean Architecture\n"+
+		"🚀 **Til:** Go (Golang)\n"+
+		"📦 **Ma'lumotlar bazasi:** SQLite/PostgreSQL\n\n"+
+		"💡 */help buyrug'i bilan barcha imkoniyatlarni ko'ring!*",
 		h.config.Bot.Name,
 		h.config.Bot.Version,
 		h.config.Bot.Description,
@@ -44,7 +44,7 @@ func (h *HaqidaCommand) Handle(ctx context.Context, cmd *domain.Command) (*domai
 
 	return &domain.Response{
 		Text:      botInfo,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 

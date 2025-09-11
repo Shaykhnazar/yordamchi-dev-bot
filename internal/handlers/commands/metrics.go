@@ -44,7 +44,7 @@ func (h *MetricsCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 
@@ -52,16 +52,16 @@ func (h *MetricsCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 func (h *MetricsCommand) formatMetricsMessage(metrics, cacheStats map[string]interface{}) string {
 	var message strings.Builder
 
-	message.WriteString("📈 <b>Bot Performance Metrics</b>\n\n")
+	message.WriteString("📈 **Bot Performance Metrics**\n\n")
 
 	// System metrics
-	message.WriteString("🖥️ <b>System:</b>\n")
+	message.WriteString("🖥️ **System:**\n")
 	if uptime, ok := metrics["uptime_seconds"].(int64); ok {
 		message.WriteString(fmt.Sprintf("   • Uptime: %s\n", formatDuration(time.Duration(uptime)*time.Second)))
 	}
 
 	// Request metrics
-	message.WriteString("\n📊 <b>Requests:</b>\n")
+	message.WriteString("\n📊 **Requests:**\n")
 	if total, ok := metrics["total_requests"].(int64); ok {
 		message.WriteString(fmt.Sprintf("   • Total: %d\n", total))
 	}
@@ -80,7 +80,7 @@ func (h *MetricsCommand) formatMetricsMessage(metrics, cacheStats map[string]int
 
 	// Top commands
 	if topCommands, ok := metrics["top_commands"].([]map[string]interface{}); ok && len(topCommands) > 0 {
-		message.WriteString("\n🔥 <b>Popular Commands:</b>\n")
+		message.WriteString("\n🔥 **Popular Commands:**\n")
 		for i, cmdData := range topCommands {
 			if i >= 5 { // Limit to top 5
 				break
@@ -95,7 +95,7 @@ func (h *MetricsCommand) formatMetricsMessage(metrics, cacheStats map[string]int
 
 	// Cache metrics
 	if cacheStats != nil {
-		message.WriteString("\n💾 <b>Cache:</b>\n")
+		message.WriteString("\n💾 **Cache:**\n")
 		if size, ok := cacheStats["cache_size"].(int); ok {
 			message.WriteString(fmt.Sprintf("   • Size: %d items\n", size))
 		}
@@ -108,7 +108,7 @@ func (h *MetricsCommand) formatMetricsMessage(metrics, cacheStats map[string]int
 	}
 
 	// Performance indicators
-	message.WriteString("\n⚡ <b>Performance:</b>\n")
+	message.WriteString("\n⚡ **Performance:**\n")
 	if cmdMetrics, ok := metrics["command_metrics"].(map[string]interface{}); ok {
 		avgDuration := h.calculateAverageResponseTime(cmdMetrics)
 		message.WriteString(fmt.Sprintf("   • Avg Response: %dms\n", avgDuration))
@@ -120,7 +120,7 @@ func (h *MetricsCommand) formatMetricsMessage(metrics, cacheStats map[string]int
 		}
 	}
 
-	message.WriteString("\n🤖 <i>Real-time performance monitoring</i>")
+	message.WriteString("\n🤖 *Real-time performance monitoring*")
 
 	return message.String()
 }

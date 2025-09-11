@@ -28,7 +28,7 @@ func (h *HazilCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 	if len(h.jokes) == 0 {
 		return &domain.Response{
 			Text:      "😅 Hech qanday hazil topilmadi!",
-			ParseMode: "HTML",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -42,7 +42,7 @@ func (h *HazilCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 
 	return &domain.Response{
 		Text:      randomJoke,
-		ParseMode: "HTML",
+		ParseMode: "Markdown",
 	}, nil
 }
 
