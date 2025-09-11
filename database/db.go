@@ -91,6 +91,28 @@ func NewDB() (*DB, error) {
     return db, nil
 }
 
+// isPostgreSQL checks if the database is PostgreSQL by attempting to use PostgreSQL-specific syntax
+func (db *DB) isPostgreSQL() bool {
+    // Try a simple query with PostgreSQL syntax
+    _, err := db.conn.Query("SELECT 1 WHERE $1 = $1", 1)
+    return err == nil
+}
+
+// getPlaceholders returns the appropriate placeholder syntax for the database
+func (db *DB) getPlaceholders(count int) []string {
+    placeholders := make([]string, count)
+    if db.isPostgreSQL() {
+        for i := 0; i < count; i++ {
+            placeholders[i] = fmt.Sprintf("$%d", i+1)
+        }
+    } else {
+        for i := 0; i < count; i++ {
+            placeholders[i] = "?"
+        }
+    }
+    return placeholders
+}
+
 func (db *DB) createTables() error {
     query := `
     CREATE TABLE IF NOT EXISTS users (
@@ -493,13 +515,26 @@ func (db *DB) GetTasksByProjectID(projectID string) ([]Task, error) {
 func (db *DB) CreateTeamMember(member *TeamMember) error {
     skillsJSON := strings.Join(member.Skills, ",")
     
-    query := `
+    // Detect database type by attempting to use PostgreSQL syntax first
+    // If it fails, fall back to SQLite syntax
+    pgQuery := `
     INSERT INTO team_members (id, team_id, user_id, username, role, skills, capacity, current_workload)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+    VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
     
-    _, err := db.conn.Exec(query, 
+    _, err := db.conn.Exec(pgQuery, 
         member.ID, member.TeamID, member.UserID, member.Username, 
         member.Role, skillsJSON, member.Capacity, member.Current)
+    
+    if err != nil && strings.Contains(err.Error(), "syntax error") {
+        // Fall back to SQLite syntax
+        sqliteQuery := `
+        INSERT INTO team_members (id, team_id, user_id, username, role, skills, capacity, current_workload)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+        
+        _, err = db.conn.Exec(sqliteQuery, 
+            member.ID, member.TeamID, member.UserID, member.Username, 
+            member.Role, skillsJSON, member.Capacity, member.Current)
+    }
     
     if err != nil {
         return fmt.Errorf("jamoa a'zosini yaratishda xatolik: %w", err)
@@ -510,27 +545,54 @@ func (db *DB) CreateTeamMember(member *TeamMember) error {
 }
 
 func (db *DB) GetTeamMembersByChatID(chatID int64) ([]TeamMember, error) {
-    // First get the team for this chat
-    teamQuery := "SELECT id FROM teams WHERE chat_id = ?"
+    // First get the team for this chat - try PostgreSQL syntax first
+    teamQuery := "SELECT id FROM teams WHERE chat_id = $1"
     var teamID string
     err := db.conn.QueryRow(teamQuery, chatID).Scan(&teamID)
+    
+    if err != nil && strings.Contains(err.Error(), "syntax error") {
+        // Fall back to SQLite syntax
+        teamQuery = "SELECT id FROM teams WHERE chat_id = ?"
+        err = db.conn.QueryRow(teamQuery, chatID).Scan(&teamID)
+    }
+    
     if err != nil {
         // If no team exists, create one
         teamID = fmt.Sprintf("team_%d", chatID)
-        createTeamQuery := "INSERT INTO teams (id, name, chat_id) VALUES (?, ?, ?)"
+        
+        // Try PostgreSQL syntax first for team creation
+        createTeamQuery := "INSERT INTO teams (id, name, chat_id) VALUES ($1, $2, $3)"
         _, err = db.conn.Exec(createTeamQuery, teamID, fmt.Sprintf("Chat %d Team", chatID), chatID)
+        
+        if err != nil && strings.Contains(err.Error(), "syntax error") {
+            // Fall back to SQLite syntax
+            createTeamQuery = "INSERT INTO teams (id, name, chat_id) VALUES (?, ?, ?)"
+            _, err = db.conn.Exec(createTeamQuery, teamID, fmt.Sprintf("Chat %d Team", chatID), chatID)
+        }
+        
         if err != nil {
             return nil, fmt.Errorf("jamoa yaratishda xatolik: %w", err)
         }
     }
     
+    // Try PostgreSQL syntax first for team members query
     query := `
     SELECT id, team_id, user_id, username, role, skills, capacity, current_workload
     FROM team_members 
-    WHERE team_id = ?
+    WHERE team_id = $1
     ORDER BY role DESC, username ASC`
     
     rows, err := db.conn.Query(query, teamID)
+    if err != nil && strings.Contains(err.Error(), "syntax error") {
+        // Fall back to SQLite syntax
+        query = `
+        SELECT id, team_id, user_id, username, role, skills, capacity, current_workload
+        FROM team_members 
+        WHERE team_id = ?
+        ORDER BY role DESC, username ASC`
+        rows, err = db.conn.Query(query, teamID)
+    }
+    
     if err != nil {
         return nil, fmt.Errorf("jamoa a'zolarini olishda xatolik: %w", err)
     }
