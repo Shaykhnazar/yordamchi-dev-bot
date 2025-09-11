@@ -321,6 +321,31 @@ func (db *DB) GetDailyStats() (map[string]int, error) {
 
 // Project methods
 func (db *DB) CreateProject(project *Project) error {
+    // First ensure the team exists (extract chat ID from team_id format "team_12345")
+    if strings.HasPrefix(project.TeamID, "team_") {
+        chatIDStr := strings.TrimPrefix(project.TeamID, "team_")
+        if chatIDStr != "" {
+            // Try to parse chat ID
+            chatID := int64(0)
+            if _, err := fmt.Sscanf(chatIDStr, "%d", &chatID); err == nil {
+                // Check if team exists
+                teamQuery := "SELECT id FROM teams WHERE chat_id = ?"
+                var existingTeamID string
+                err := db.conn.QueryRow(teamQuery, chatID).Scan(&existingTeamID)
+                if err != nil {
+                    // Team doesn't exist, create it
+                    createTeamQuery := "INSERT INTO teams (id, name, chat_id) VALUES (?, ?, ?)"
+                    _, err = db.conn.Exec(createTeamQuery, project.TeamID, fmt.Sprintf("Chat %d Team", chatID), chatID)
+                    if err != nil {
+                        return fmt.Errorf("jamoa yaratishda xatolik: %w", err)
+                    }
+                    log.Printf("👥 Jamoa yaratildi: %s (Chat ID: %d)", project.TeamID, chatID)
+                }
+            }
+        }
+    }
+    
+    // Now create the project
     query := `
     INSERT INTO projects (id, name, description, team_id, status)
     VALUES (?, ?, ?, ?, ?)`

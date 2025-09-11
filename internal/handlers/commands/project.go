@@ -69,7 +69,7 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		ID:          projectID,
 		Name:        projectName,
 		Description: fmt.Sprintf("Project created via Telegram bot by @%s", cmd.User.Username),
-		TeamID:      fmt.Sprintf("chat_%d", cmd.Chat.ID),
+		TeamID:      fmt.Sprintf("team_%d", cmd.Chat.ID),
 		Status:      "active",
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
