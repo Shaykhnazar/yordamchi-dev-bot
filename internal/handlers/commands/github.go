@@ -51,7 +51,7 @@ func (h *GitHubCommand) Handle(ctx context.Context, cmd *domain.Command) (*domai
 // CanHandle checks if this handler can process the command
 func (h *GitHubCommand) CanHandle(command string) bool {
 	cmd := strings.ToLower(strings.Fields(command)[0])
-	return cmd == "/repo" || cmd == "/user"
+	return cmd == "/repo" || cmd == "/user" || cmd == "/github"
 }
 
 // Description returns the command description
