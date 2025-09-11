@@ -351,12 +351,15 @@ func (db *DB) CreateProject(project *Project) error {
             chatID := int64(0)
             if _, err := fmt.Sscanf(chatIDStr, "%d", &chatID); err == nil {
                 // Check if team exists
-                teamQuery := "SELECT id FROM teams WHERE chat_id = ?"
+                teamPlaceholders := db.getPlaceholders(1)
+                teamQuery := fmt.Sprintf("SELECT id FROM teams WHERE chat_id = %s", teamPlaceholders[0])
                 var existingTeamID string
                 err := db.conn.QueryRow(teamQuery, chatID).Scan(&existingTeamID)
                 if err != nil {
                     // Team doesn't exist, create it
-                    createTeamQuery := "INSERT INTO teams (id, name, chat_id) VALUES (?, ?, ?)"
+                    createPlaceholders := db.getPlaceholders(3)
+                    createTeamQuery := fmt.Sprintf("INSERT INTO teams (id, name, chat_id) VALUES (%s, %s, %s)", 
+                        createPlaceholders[0], createPlaceholders[1], createPlaceholders[2])
                     _, err = db.conn.Exec(createTeamQuery, project.TeamID, fmt.Sprintf("Chat %d Team", chatID), chatID)
                     if err != nil {
                         return fmt.Errorf("jamoa yaratishda xatolik: %w", err)
@@ -368,9 +371,11 @@ func (db *DB) CreateProject(project *Project) error {
     }
     
     // Now create the project
-    query := `
+    placeholders := db.getPlaceholders(5)
+    query := fmt.Sprintf(`
     INSERT INTO projects (id, name, description, team_id, status)
-    VALUES (?, ?, ?, ?, ?)`
+    VALUES (%s, %s, %s, %s, %s)`, 
+        placeholders[0], placeholders[1], placeholders[2], placeholders[3], placeholders[4])
     
     _, err := db.conn.Exec(query, project.ID, project.Name, project.Description, project.TeamID, project.Status)
     if err != nil {
@@ -383,24 +388,28 @@ func (db *DB) CreateProject(project *Project) error {
 
 func (db *DB) GetProjectsByChatID(chatID int64) ([]Project, error) {
     // First get the team for this chat
-    teamQuery := "SELECT id FROM teams WHERE chat_id = ?"
+    teamPlaceholders := db.getPlaceholders(1)
+    teamQuery := fmt.Sprintf("SELECT id FROM teams WHERE chat_id = %s", teamPlaceholders[0])
     var teamID string
     err := db.conn.QueryRow(teamQuery, chatID).Scan(&teamID)
     if err != nil {
         // If no team exists, create one
         teamID = fmt.Sprintf("team_%d", chatID)
-        createTeamQuery := "INSERT INTO teams (id, name, chat_id) VALUES (?, ?, ?)"
+        createPlaceholders := db.getPlaceholders(3)
+        createTeamQuery := fmt.Sprintf("INSERT INTO teams (id, name, chat_id) VALUES (%s, %s, %s)", 
+            createPlaceholders[0], createPlaceholders[1], createPlaceholders[2])
         _, err = db.conn.Exec(createTeamQuery, teamID, fmt.Sprintf("Chat %d Team", chatID), chatID)
         if err != nil {
             return nil, fmt.Errorf("jamoa yaratishda xatolik: %w", err)
         }
     }
     
-    query := `
+    projectPlaceholders := db.getPlaceholders(1)
+    query := fmt.Sprintf(`
     SELECT id, name, description, team_id, status, created_at, updated_at 
     FROM projects 
-    WHERE team_id = ?
-    ORDER BY created_at DESC`
+    WHERE team_id = %s
+    ORDER BY created_at DESC`, projectPlaceholders[0])
     
     rows, err := db.conn.Query(query, teamID)
     if err != nil {
@@ -436,9 +445,12 @@ func (db *DB) CreateTask(task *Task) error {
         dependencies = fmt.Sprintf("[%s]", strings.Join(task.Dependencies, ","))
     }
     
-    query := `
+    placeholders := db.getPlaceholders(10)
+    query := fmt.Sprintf(`
     INSERT INTO tasks (id, project_id, title, description, category, estimate_hours, status, priority, assigned_to, dependencies)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+    VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)`, 
+        placeholders[0], placeholders[1], placeholders[2], placeholders[3], placeholders[4],
+        placeholders[5], placeholders[6], placeholders[7], placeholders[8], placeholders[9])
     
     _, err := db.conn.Exec(query, 
         task.ID, task.ProjectID, task.Title, task.Description, 
@@ -453,12 +465,13 @@ func (db *DB) CreateTask(task *Task) error {
 }
 
 func (db *DB) GetTasksByProjectID(projectID string) ([]Task, error) {
-    query := `
+    placeholders := db.getPlaceholders(1)
+    query := fmt.Sprintf(`
     SELECT id, project_id, title, description, category, estimate_hours, actual_hours, 
            status, priority, assigned_to, dependencies, created_at, updated_at, completed_at
     FROM tasks 
-    WHERE project_id = ?
-    ORDER BY priority ASC, created_at ASC`
+    WHERE project_id = %s
+    ORDER BY priority ASC, created_at ASC`, placeholders[0])
     
     rows, err := db.conn.Query(query, projectID)
     if err != nil {
@@ -629,14 +642,15 @@ func (db *DB) GetTeamMembersByChatID(chatID int64) ([]TeamMember, error) {
 }
 
 func (db *DB) GetProjectStats(projectID string) (*ProjectStats, error) {
-    query := `
+    placeholders := db.getPlaceholders(1)
+    query := fmt.Sprintf(`
     SELECT 
         COUNT(*) as total_tasks,
         COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_tasks,
         SUM(estimate_hours) as estimated_hours,
         SUM(actual_hours) as actual_hours
     FROM tasks 
-    WHERE project_id = ?`
+    WHERE project_id = %s`, placeholders[0])
     
     var stats ProjectStats
     err := db.conn.QueryRow(query, projectID).Scan(
