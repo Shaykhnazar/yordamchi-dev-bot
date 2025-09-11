@@ -36,7 +36,7 @@ func (c *ProjectCommand) Description() string {
 
 // Usage returns the command usage instructions
 func (c *ProjectCommand) Usage() string {
-	return "/create_project <name> - Create new development project"
+	return "/create_project project_name - Create new development project"
 }
 
 // Handle processes the create_project command
@@ -89,7 +89,7 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		"📅 **Created:** %s\n"+
 		"📊 **Status:** %s\n\n"+
 		"**Next Steps:**\n"+
-		"• Use `/analyze <requirement>` to break down features\n"+
+		"• Use `/analyze requirement` to break down features\n"+
 		"• Use `/add_member @user skills` to build your team\n"+
 		"• Use `/list_projects` to see all your projects",
 		projectName, 

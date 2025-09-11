@@ -127,7 +127,7 @@ func (c *ListTeamCommand) formatTeamList(members []domain.TeamMember) string {
 	response += "**Team Management:**\n"
 	response += "• `/workload` - Detailed workload analysis\n"
 	response += "• `/add_member @user skills` - Add more team members\n"
-	response += "• `/analyze <requirement>` - Get smart task assignments\n"
+	response += "• `/analyze requirement` - Get smart task assignments\n"
 	
 	// Capacity recommendations
 	if teamUtilization > 0.85 {

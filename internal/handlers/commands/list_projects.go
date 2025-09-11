@@ -50,8 +50,8 @@ func (c *ListProjectsCommand) Handle(ctx context.Context, cmd *domain.Command) (
 			Text: "📋 **No Projects Found**\n\n" +
 				"You haven't created any projects yet.\n\n" +
 				"**Get Started:**\n" +
-				"• Use `/create_project <name>` to create your first project\n" +
-				"• Use `/analyze <requirement>` to break down features\n" +
+				"• Use `/create_project project_name` to create your first project\n" +
+				"• Use `/analyze requirement` to break down features\n" +
 				"• Use `/add_member @user skills` to build your team\n\n" +
 				"**Example:** `/create_project E-commerce Platform`",
 			ParseMode: "Markdown",
@@ -130,10 +130,10 @@ func (c *ListProjectsCommand) formatProjectsList(projects []domain.Project) stri
 	response += "\n\n"
 	
 	response += "**Available Actions:**\n"
-	response += "• `/analyze <requirement>` - Break down new features\n"
+	response += "• `/analyze requirement` - Break down new features\n"
 	response += "• `/workload` - Check team capacity\n"
 	response += "• `/project_stats <id>` - Detailed project analytics\n"
-	response += "• `/create_project <name>` - Start a new project"
+	response += "• `/create_project project_name` - Start a new project"
 	
 	return response
 }

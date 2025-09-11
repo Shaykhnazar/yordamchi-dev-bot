@@ -57,8 +57,8 @@ func (c *WorkloadCommand) Handle(ctx context.Context, cmd *domain.Command) (*dom
 			Text: "❌ No team members found for this chat.\n\n" +
 				"**Get Started:**\n" +
 				"• Use `/add_member @username skills` to add team members\n" +
-				"• Use `/create_project <name>` to create a project\n" +
-				"• Use `/analyze <requirement>` to generate tasks\n\n" +
+				"• Use `/create_project project_name` to create a project\n" +
+				"• Use `/analyze requirement` to generate tasks\n\n" +
 				"**Example:** `/add_member @alice go,react,docker`",
 			ParseMode: "Markdown",
 		}, nil

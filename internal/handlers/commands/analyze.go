@@ -289,7 +289,7 @@ func (c *AnalyzeCommand) formatTaskBreakdown(result *domain.TaskBreakdownRespons
 	response.WriteString(fmt.Sprintf("📊 **Analysis Confidence:** %s %.0f%%\n\n", confidenceEmoji, result.Confidence*100))
 	
 	response.WriteString("**Next Steps:**\n")
-	response.WriteString("• Use `/create_project <name>` to create a project\n")
+	response.WriteString("• Use `/create_project project_name` to create a project\n")
 	response.WriteString("• Use `/add_member @user skills` to build your team\n")
 	response.WriteString("• Use `/workload` to check team capacity")
 	
@@ -373,7 +373,7 @@ func (c *AnalyzeCommand) formatFileAnalysisResults(result *domain.TaskBreakdownR
 	
 	// Next steps
 	response.WriteString("🚀 **Next Steps:**\n")
-	response.WriteString("• Use `/create_project <name>` to create a project\n")
+	response.WriteString("• Use `/create_project project_name` to create a project\n")
 	response.WriteString("• Use `/add_member @user skills` to build your team\n")
 	response.WriteString("• Use `/workload` to analyze team capacity\n")
 	response.WriteString("• Use `/list_projects` to track progress")
@@ -435,5 +435,5 @@ func (c *AnalyzeCommand) Description() string {
 
 // Usage returns the command usage instructions
 func (c *AnalyzeCommand) Usage() string {
-	return "/analyze <requirement> - Analyze development requirements and break them down into tasks"
+	return "/analyze requirement - Analyze development requirements and break them down into tasks"
 }

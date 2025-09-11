@@ -115,7 +115,7 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 		"**Next Steps:**\n"+
 		"• Use `/list_team` to see all team members\n"+
 		"• Use `/workload` to analyze team capacity\n"+
-		"• Use `/analyze <requirement>` for smart task assignment",
+		"• Use `/analyze requirement` for smart task assignment",
 		username, 
 		strings.Join(cleanSkills, ", "), 
 		member.Capacity,
