@@ -148,7 +148,7 @@ func (b *TelegramBot) processUpdate(update *TelegramUpdate) {
 
 	// Send response back to Telegram
 	if response != nil && response.Text != "" {
-		err = b.sendTelegramMessage(update.Message.Chat.ID, response.Text)
+		err = b.sendTelegramMessageWithParseMode(update.Message.Chat.ID, response.Text, response.ParseMode)
 		if err != nil {
 			b.dependencies.Logger.Error("Failed to send Telegram message", 
 				"chat_id", update.Message.Chat.ID,
@@ -190,12 +190,22 @@ func (b *TelegramBot) convertToDomainCommand(msg *TelegramMessage) *domain.Comma
 	return cmd
 }
 
-// sendTelegramMessage sends a message to Telegram
+// sendTelegramMessage sends a message to Telegram with HTML parse mode (for backwards compatibility)
 func (b *TelegramBot) sendTelegramMessage(chatID int64, text string) error {
+	return b.sendTelegramMessageWithParseMode(chatID, text, "HTML")
+}
+
+// sendTelegramMessageWithParseMode sends a message to Telegram with specified parse mode
+func (b *TelegramBot) sendTelegramMessageWithParseMode(chatID int64, text string, parseMode string) error {
+	// Default to HTML if parseMode is empty
+	if parseMode == "" {
+		parseMode = "HTML"
+	}
+
 	payload := map[string]interface{}{
 		"chat_id":    chatID,
 		"text":       text,
-		"parse_mode": "HTML",
+		"parse_mode": parseMode,
 	}
 
 	jsonPayload, err := json.Marshal(payload)
