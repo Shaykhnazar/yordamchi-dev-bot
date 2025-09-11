@@ -55,7 +55,7 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 				"• Use descriptive names (E-commerce Platform, Mobile App, etc.)\n" +
 				"• Keep it concise but clear\n" +
 				"• Avoid special characters",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -81,7 +81,7 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		c.logger.Error("Failed to create project", "error", err, "project_name", projectName)
 		return &domain.Response{
 			Text:      "❌ Project creation failed. Please try again.",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -108,7 +108,7 @@ func (c *ProjectCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

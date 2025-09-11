@@ -28,7 +28,7 @@ func (h *IqtibosCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	if len(h.quotes) == 0 {
 		return &domain.Response{
 			Text:      "💭 Hech qanday iqtibos topilmadi!",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -42,7 +42,7 @@ func (h *IqtibosCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 
 	return &domain.Response{
 		Text:      randomQuote,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

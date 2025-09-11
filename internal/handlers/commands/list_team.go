@@ -57,7 +57,7 @@ func (c *ListTeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*dom
 				"• Skills examples: `go,react,docker` or `python,vue,aws`\n" +
 				"• Use `/workload` to analyze team capacity after adding members\n\n" +
 				"**Example:** `/add_member @alice go,postgresql,docker`",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -69,7 +69,7 @@ func (c *ListTeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*dom
 
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

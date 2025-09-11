@@ -47,7 +47,7 @@ func (c *ListProjectsCommand) Handle(ctx context.Context, cmd *domain.Command) (
 		c.logger.Error("Failed to get projects", "error", err, "chat_id", cmd.Chat.ID)
 		return &domain.Response{
 			Text:      "❌ Failed to retrieve projects. Please try again.",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -60,7 +60,7 @@ func (c *ListProjectsCommand) Handle(ctx context.Context, cmd *domain.Command) (
 				"• Use `/analyze requirement` to break down features\n" +
 				"• Use `/add_member @user skills` to build your team\n\n" +
 				"**Example:** `/create_project E-commerce Platform`",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -72,7 +72,7 @@ func (c *ListProjectsCommand) Handle(ctx context.Context, cmd *domain.Command) (
 
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

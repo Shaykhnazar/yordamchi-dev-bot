@@ -55,7 +55,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 				"**Maximum size:** 20MB",
 				err.Error(),
 				strings.Join(c.fileExtractor.GetSupportedFormats(), ", ")),
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -69,7 +69,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 				"• Reducing file size\n" +
 				"• Converting to a simpler format (TXT, MD)\n" +
 				"• Checking your internet connection",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -89,7 +89,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 				"• Try saving in a different format\n"+
 				"• For PDFs, ensure text is selectable (not scanned image)",
 				err.Error()),
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -103,7 +103,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 				"• Text is embedded in images (OCR not supported yet)\n\n"+
 				"**Suggestion:** Try uploading a plain text file with your requirements.",
 				cmd.Document.FileName),
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -123,7 +123,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 				"• Simplifying the requirements document\n" +
 				"• Using more specific technical language\n" +
 				"• Breaking down into smaller sections",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -140,7 +140,7 @@ func (c *AnalyzeCommand) handleFileAnalysis(ctx context.Context, cmd *domain.Com
 
 	return &domain.Response{
 		Text:      responseText,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 
@@ -162,7 +162,7 @@ func (c *AnalyzeCommand) handleTextAnalysis(ctx context.Context, cmd *domain.Com
 				"• Include project scope (backend, frontend, full-stack)\n" +
 				"• Mention integrations (GitHub, Stripe, etc.)\n" +
 				"• Describe user stories and acceptance criteria",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -186,7 +186,7 @@ func (c *AnalyzeCommand) handleTextAnalysis(ctx context.Context, cmd *domain.Com
 				"• Include technology stack details\n" +
 				"• Specify project scope and goals\n" +
 				"• Provide concrete user stories",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -201,7 +201,7 @@ func (c *AnalyzeCommand) handleTextAnalysis(ctx context.Context, cmd *domain.Com
 
 	return &domain.Response{
 		Text:      responseText,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

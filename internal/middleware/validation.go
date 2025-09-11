@@ -74,7 +74,7 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 
 			return &domain.Response{
 				Text:      fmt.Sprintf("❌ Buyruq juda uzun. Maksimal uzunlik: %d belgi", m.maxLength),
-				ParseMode: "MarkdownV2",
+				ParseMode: "Markdown",
 			}, nil
 		}
 
@@ -110,7 +110,7 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 					validator.Description,
 					validator.Usage,
 				),
-				ParseMode: "MarkdownV2",
+				ParseMode: "Markdown",
 			}, nil
 		}
 
@@ -127,7 +127,7 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 					validator.Description,
 					validator.Usage,
 				),
-				ParseMode: "MarkdownV2",
+				ParseMode: "Markdown",
 			}, nil
 		}
 
@@ -145,7 +145,7 @@ func (m *ValidationMiddleware) Process(ctx context.Context, next domain.HandlerF
 					validator.Usage,
 					m.getExampleUsage(baseCommand),
 				),
-				ParseMode: "MarkdownV2",
+				ParseMode: "Markdown",
 			}, nil
 		}
 

@@ -36,7 +36,7 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 		h.logger.Error("Failed to get user stats", "error", err)
 		return &domain.Response{
 			Text:      "❌ Statistikani olishda xatolik yuz berdi",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -88,7 +88,7 @@ func (h *StatsCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

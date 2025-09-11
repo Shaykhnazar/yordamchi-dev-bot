@@ -29,7 +29,7 @@ func (h *GitHubCommand) Handle(ctx context.Context, cmd *domain.Command) (*domai
 	if len(parts) < 2 {
 		return &domain.Response{
 			Text:      h.getUsageMessage(),
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -39,7 +39,7 @@ func (h *GitHubCommand) Handle(ctx context.Context, cmd *domain.Command) (*domai
 	case "/github":
 		return &domain.Response{
 			Text:      h.getUsageMessage(),
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	case "/repo":
 		return h.handleRepoCommand(ctx, parts[1:])
@@ -48,7 +48,7 @@ func (h *GitHubCommand) Handle(ctx context.Context, cmd *domain.Command) (*domai
 	default:
 		return &domain.Response{
 			Text:      "❌ Noma'lum GitHub buyruq",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 }
@@ -74,7 +74,7 @@ func (h *GitHubCommand) handleRepoCommand(ctx context.Context, args []string) (*
 	if len(args) != 1 {
 		return &domain.Response{
 			Text:      "❌ Format: /repo owner/repository\nMisol: /repo torvalds/linux",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -82,7 +82,7 @@ func (h *GitHubCommand) handleRepoCommand(ctx context.Context, args []string) (*
 	if len(repoParts) != 2 {
 		return &domain.Response{
 			Text:      "❌ Format: /repo owner/repository\nMisol: /repo torvalds/linux",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -97,14 +97,14 @@ func (h *GitHubCommand) handleRepoCommand(ctx context.Context, args []string) (*
 		h.logger.Error("GitHub repository error", "error", err, "owner", owner, "repo", repo)
 		return &domain.Response{
 			Text:      "❌ Repository topilmadi yoki xatolik yuz berdi",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
 	message := h.githubService.FormatRepository(repository)
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 
@@ -113,7 +113,7 @@ func (h *GitHubCommand) handleUserCommand(ctx context.Context, args []string) (*
 	if len(args) != 1 {
 		return &domain.Response{
 			Text:      "❌ Format: /user username\nMisol: /user torvalds",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -127,14 +127,14 @@ func (h *GitHubCommand) handleUserCommand(ctx context.Context, args []string) (*
 		h.logger.Error("GitHub user error", "error", err, "username", username)
 		return &domain.Response{
 			Text:      "❌ Foydalanuvchi topilmadi yoki xatolik yuz berdi",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
 	message := h.githubService.FormatUser(user)
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

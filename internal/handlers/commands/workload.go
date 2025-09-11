@@ -60,7 +60,7 @@ func (c *WorkloadCommand) Handle(ctx context.Context, cmd *domain.Command) (*dom
 				"• Use `/create_project project_name` to create a project\n" +
 				"• Use `/analyze requirement` to generate tasks\n\n" +
 				"**Example:** `/add_member @alice go,react,docker`",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -77,7 +77,7 @@ func (c *WorkloadCommand) Handle(ctx context.Context, cmd *domain.Command) (*dom
 
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

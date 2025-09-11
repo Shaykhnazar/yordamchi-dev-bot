@@ -44,7 +44,7 @@ func (h *MetricsCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

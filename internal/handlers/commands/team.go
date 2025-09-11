@@ -60,7 +60,7 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 				"• Frontend: `react,vue,angular,javascript,typescript`\n" +
 				"• DevOps: `docker,kubernetes,aws,terraform`\n" +
 				"• QA: `testing,automation,selenium,cypress`",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -80,7 +80,7 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 	if len(cleanSkills) == 0 {
 		return &domain.Response{
 			Text:      "❌ Please provide at least one skill.",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -105,7 +105,7 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 		c.logger.Error("Failed to create team member", "error", err, "username", username)
 		return &domain.Response{
 			Text:      "❌ Failed to add team member. Please try again.",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -133,7 +133,7 @@ func (c *TeamCommand) Handle(ctx context.Context, cmd *domain.Command) (*domain.
 
 	return &domain.Response{
 		Text:      response,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

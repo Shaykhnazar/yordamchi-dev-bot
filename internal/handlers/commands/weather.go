@@ -30,7 +30,7 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 	if len(parts) < 2 {
 		return &domain.Response{
 			Text:      "🌤️ Shahar nomini kiriting!\n\nMisol: `/weather Tashkent`",
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -42,7 +42,7 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 		h.logger.Error("Failed to get weather", "city", city, "error", err)
 		return &domain.Response{
 			Text:      fmt.Sprintf("❌ %s shahri uchun ob-havo ma'lumotini olishda xatolik", city),
-			ParseMode: "MarkdownV2",
+			ParseMode: "Markdown",
 		}, nil
 	}
 
@@ -74,7 +74,7 @@ func (h *WeatherCommand) Handle(ctx context.Context, cmd *domain.Command) (*doma
 
 	return &domain.Response{
 		Text:      message,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

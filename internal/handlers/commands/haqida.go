@@ -44,7 +44,7 @@ func (h *HaqidaCommand) Handle(ctx context.Context, cmd *domain.Command) (*domai
 
 	return &domain.Response{
 		Text:      botInfo,
-		ParseMode: "MarkdownV2",
+		ParseMode: "Markdown",
 	}, nil
 }
 

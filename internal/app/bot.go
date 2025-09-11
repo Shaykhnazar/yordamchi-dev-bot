@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"regexp"
 	"strings"
 	"time"
 
@@ -222,8 +223,43 @@ func (b *TelegramBot) sendTelegramMessageWithParseMode(chatID int64, text string
 
 	if resp.StatusCode != http.StatusOK {
 		body, _ := io.ReadAll(resp.Body)
+		
+		// If it's a Markdown parsing error and we're using Markdown, fallback to plain text
+		if parseMode == "Markdown" && strings.Contains(string(body), "can't parse entities") {
+			b.dependencies.Logger.Warn("Markdown parsing failed, falling back to plain text", 
+				"chat_id", chatID, 
+				"error", string(body))
+			
+			// Strip Markdown formatting and retry with no parse mode
+			plainText := stripMarkdown(text)
+			return b.sendTelegramMessageWithParseMode(chatID, plainText, "")
+		}
+		
 		return fmt.Errorf("telegram API error: %d, response: %s", resp.StatusCode, string(body))
 	}
 
 	return nil
+}
+
+// stripMarkdown removes Markdown formatting from text to create plain text fallback
+func stripMarkdown(text string) string {
+	// Remove bold formatting **text**
+	text = regexp.MustCompile(`\*\*(.*?)\*\*`).ReplaceAllString(text, "$1")
+	
+	// Remove italic formatting *text*
+	text = regexp.MustCompile(`\*(.*?)\*`).ReplaceAllString(text, "$1")
+	
+	// Remove inline code `text`
+	text = regexp.MustCompile("`([^`]*)`").ReplaceAllString(text, "$1")
+	
+	// Remove links [text](url) -> text
+	text = regexp.MustCompile(`\[([^\]]+)\]\([^)]+\)`).ReplaceAllString(text, "$1")
+	
+	// Remove escaped characters
+	text = strings.ReplaceAll(text, `\-`, "-")
+	text = strings.ReplaceAll(text, `\_`, "_")
+	text = strings.ReplaceAll(text, `\!`, "!")
+	text = strings.ReplaceAll(text, `\.`, ".")
+	
+	return text
 }
