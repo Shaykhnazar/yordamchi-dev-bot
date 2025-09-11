@@ -11,6 +11,7 @@ import (
 
 type TaskAnalyzer struct {
 	claudeService *ClaudeService
+	openaiService *OpenAIService
 	geminiService *GeminiService
 	logger        domain.Logger
 }
@@ -18,6 +19,7 @@ type TaskAnalyzer struct {
 func NewTaskAnalyzer(logger domain.Logger) *TaskAnalyzer {
 	return &TaskAnalyzer{
 		claudeService: NewClaudeService(logger),
+		openaiService: NewOpenAIService(logger),
 		geminiService: NewGeminiService(logger),
 		logger:        logger,
 	}
@@ -27,19 +29,29 @@ func NewTaskAnalyzer(logger domain.Logger) *TaskAnalyzer {
 func (ta *TaskAnalyzer) AnalyzeRequirement(req domain.TaskBreakdownRequest) (*domain.TaskBreakdownResponse, error) {
 	ctx := context.Background()
 	
-	// Try AI services in order of preference, fall back to rule-based analysis
+	// Intelligent AI fallback chain: Claude → OpenAI → Gemini → Rule-based
 	
-	// 1. Try Claude first (most accurate for code analysis)
+	// 1. Try Claude first (most accurate for code analysis and complex reasoning)
 	if ta.claudeService.IsConfigured() {
 		ta.logger.Info("Using Claude AI for task analysis")
 		result, err := ta.claudeService.AnalyzeRequirement(ctx, req)
 		if err == nil {
 			return result, nil
 		}
-		ta.logger.Error("Claude analysis failed, trying Gemini", "error", err)
+		ta.logger.Error("Claude analysis failed, trying OpenAI", "error", err)
 	}
 	
-	// 2. Try Gemini as fallback
+	// 2. Try OpenAI ChatGPT as primary fallback (most widely available and reliable)
+	if ta.openaiService.IsConfigured() {
+		ta.logger.Info("Using OpenAI ChatGPT for task analysis")
+		result, err := ta.openaiService.AnalyzeRequirement(ctx, req)
+		if err == nil {
+			return result, nil
+		}
+		ta.logger.Error("OpenAI analysis failed, trying Gemini", "error", err)
+	}
+	
+	// 3. Try Gemini as secondary fallback
 	if ta.geminiService.IsConfigured() {
 		ta.logger.Info("Using Gemini AI for task analysis")
 		result, err := ta.geminiService.AnalyzeRequirement(ctx, req)
@@ -49,8 +61,8 @@ func (ta *TaskAnalyzer) AnalyzeRequirement(req domain.TaskBreakdownRequest) (*do
 		ta.logger.Error("Gemini analysis failed, using rule-based fallback", "error", err)
 	}
 	
-	// 3. Fall back to rule-based analysis
-	ta.logger.Info("Using rule-based task analysis (no AI configured)")
+	// 4. Final fallback to rule-based analysis (always works)
+	ta.logger.Info("Using rule-based task analysis (no AI services available)")
 	return ta.ruleBasedAnalysis(req)
 }
 

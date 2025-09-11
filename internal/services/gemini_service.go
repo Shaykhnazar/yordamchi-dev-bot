@@ -17,6 +17,7 @@ import (
 // GeminiService handles integration with Google Gemini API
 type GeminiService struct {
 	apiKey     string
+	model      string
 	httpClient *http.Client
 	baseURL    string
 	logger     domain.Logger
@@ -49,9 +50,19 @@ type GeminiCandidate struct {
 
 // NewGeminiService creates a new Gemini service
 func NewGeminiService(logger domain.Logger) *GeminiService {
+	// Default to Gemini Pro if no model specified
+	model := os.Getenv("GEMINI_MODEL")
+	if model == "" {
+		model = "gemini-pro"
+	}
+	
+	// Build the full URL with model
+	baseURL := fmt.Sprintf("https://generativelanguage.googleapis.com/v1beta/models/%s:generateContent", model)
+	
 	return &GeminiService{
 		apiKey:  os.Getenv("GEMINI_API_KEY"),
-		baseURL: "https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent",
+		model:   model,
+		baseURL: baseURL,
 		httpClient: &http.Client{
 			Timeout: 60 * time.Second,
 		},

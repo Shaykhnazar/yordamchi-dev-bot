@@ -17,6 +17,7 @@ import (
 // ClaudeService handles integration with Claude.ai API
 type ClaudeService struct {
 	apiKey     string
+	model      string
 	httpClient *http.Client
 	baseURL    string
 	logger     domain.Logger
@@ -58,8 +59,15 @@ type ClaudeUsage struct {
 
 // NewClaudeService creates a new Claude service
 func NewClaudeService(logger domain.Logger) *ClaudeService {
+	// Default to Claude-3 Haiku if no model specified
+	model := os.Getenv("CLAUDE_MODEL")
+	if model == "" {
+		model = "claude-3-haiku-20240307"
+	}
+	
 	return &ClaudeService{
 		apiKey:  os.Getenv("CLAUDE_API_KEY"),
+		model:   model,
 		baseURL: "https://api.anthropic.com/v1/messages",
 		httpClient: &http.Client{
 			Timeout: 60 * time.Second,
@@ -147,7 +155,7 @@ Respond only with valid JSON.`, req.Requirement, req.ProjectType, skillsStr)
 // sendRequest sends request to Claude API
 func (c *ClaudeService) sendRequest(ctx context.Context, prompt string) (string, error) {
 	reqData := ClaudeRequest{
-		Model:     "claude-3-haiku-20240307",
+		Model:     c.model,
 		MaxTokens: 4000,
 		Messages: []ClaudeMessage{
 			{
